@@ -1,0 +1,325 @@
+package com.bookworm.reader;
+
+import android.app.AlertDialog;
+import android.content.Intent;
+import android.os.*;
+import android.net.Uri;
+import android.view.*;
+import android.view.accessibility.AccessibilityManager;
+import android.webkit.*;
+import android.widget.*;
+import java.io.*;
+import java.util.*;
+import java.util.concurrent.*;
+import org.json.*;
+
+/** One WebView, one chapter at a time, with native navigation and durable text anchors. */
+public final class ReaderActivity extends ThemedActivity {
+    private EpubBook book;
+    private ReaderWebView web;
+    private TextView progress;
+    private ReaderPreferences preferences;
+    private String path, script, inputScript, styleKey;
+    private ReaderChrome chrome;
+    private ReaderChromeState chromeState;
+    private AccessibilityManager accessibility;
+    private AccessibilityManager.TouchExplorationStateChangeListener explorationListener;
+    private ReaderTap tap;
+    private int tapGeneration;
+    private float tapX, tapY;
+    private int tapScrollX, tapScrollY;
+    private boolean foreground;
+    private volatile String readerCss;
+    private ReadingPosition position;
+    private ReadingPosition queuedPosition;
+    private int targetOffset;
+    private String targetFragment = "";
+    private boolean ready, busy, destroyed;
+    private int generation;
+    private final Handler handler = new Handler(Looper.getMainLooper());
+    private final ExecutorService disk = Executors.newSingleThreadExecutor();
+    private final ArrayDeque<ReadingPosition> history = new ArrayDeque<>();
+    private final Set<String> imagePaths = new HashSet<>();
+    private long imagePixels;
+    private final Runnable autosave = new Runnable() {
+        @Override public void run() { if (!destroyed) { capture(null); handler.postDelayed(this, 1500); } }
+    };
+    @Override protected void onCreate(Bundle state) {
+        super.onCreate(state); loadAppearance(); preferences = ReaderPreferences.load(this);
+        chromeState = new ReaderChromeState(preferences.controlsOnOpen);
+        if (state != null) chromeState.show(state.getBoolean("chromeShown", preferences.controlsOnOpen));
+        accessibility = (AccessibilityManager) getSystemService(ACCESSIBILITY_SERVICE);
+        explorationListener = enabled -> { if (enabled && foreground) { chromeState.accessibility(true); applyChrome(true); } };
+        if (accessibility != null) accessibility.addTouchExplorationStateChangeListener(explorationListener);
+        try {
+            book = LibraryStore.open(this, getIntent().getStringExtra("book"));
+            try (InputStream in = getAssets().open("reader.js"); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+                byte[] buffer = new byte[4096]; int n; while ((n = in.read(buffer)) != -1) out.write(buffer, 0, n); script = out.toString("UTF-8");
+            }
+            try (InputStream in = getAssets().open("reader-input.js"); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+                byte[] buffer = new byte[4096]; int n; while ((n = in.read(buffer)) != -1) out.write(buffer, 0, n); inputScript = out.toString("UTF-8");
+            }
+            position = ReadingPosition.load(book.directory, book.chapters.get(0));
+            if (state != null) position = new ReadingPosition(state.getString("chapter", position.chapter), state.getInt("offset", position.offset));
+            if (!book.content(position.chapter).isFile()) position = new ReadingPosition(book.chapters.get(0), 0);
+            createReader(); load(position.chapter, position.offset, "");
+        } catch (Exception failed) {
+            LinearLayout root = column(); root.addView(text("Could not open EPUB: " + failed.getMessage(), false));
+            root.addView(button("Back to bookshelf", v -> finish())); setContentView(root);
+        }
+    }
+    @android.annotation.SuppressLint({"SetJavaScriptEnabled", "ClickableViewAccessibility"}) // Trusted JS only; non-consuming touch observer and native accessible controls.
+    private void createReader() {
+        FrameLayout root = new FrameLayout(this); root.setFitsSystemWindows(true); root.setBackgroundColor(appearance.background);
+        web = new ReaderWebView(this); web.setBackgroundColor(appearance.background);
+        WebSettings settings = web.getSettings();
+        settings.setJavaScriptEnabled(true); settings.setJavaScriptCanOpenWindowsAutomatically(false);
+        settings.setAllowFileAccess(false); settings.setAllowContentAccess(false);
+        settings.setAllowFileAccessFromFileURLs(false); settings.setAllowUniversalAccessFromFileURLs(false);
+        settings.setBlockNetworkLoads(true); settings.setBlockNetworkImage(false);
+        settings.setDomStorageEnabled(false); settings.setDatabaseEnabled(false);
+        settings.setCacheMode(WebSettings.LOAD_NO_CACHE); settings.setSupportMultipleWindows(false);
+        settings.setMixedContentMode(WebSettings.MIXED_CONTENT_NEVER_ALLOW);
+        settings.setMediaPlaybackRequiresUserGesture(true); settings.setBuiltInZoomControls(false);
+        settings.setTextZoom(100);
+        CookieManager.getInstance().setAcceptCookie(false); CookieManager.getInstance().setAcceptThirdPartyCookies(web, false);
+        web.setHorizontalScrollBarEnabled(false); web.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        web.setWebViewClient(new WebViewClient() {
+            @Override public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) { return resource(request.getUrl().toString()); }
+            @Override public WebResourceResponse shouldInterceptRequest(WebView view, String url) { return resource(url); }
+            @Override public boolean shouldOverrideUrlLoading(WebView view, String url) { showChrome(false, false); follow(url); return true; }
+            @Override public void onPageFinished(WebView view, String url) {
+                if (destroyed || !url.equals(localUrl(path))) return;
+                final int ticket = generation;
+                view.evaluateJavascript(script + "\n" + inputScript + "\nBW.init(" + preferences.paged + "," + preferences.margin + "," + targetOffset + "," + JSONObject.quote(targetFragment) + ");", value -> {
+                    if (ticket != generation || destroyed) return;
+                    ready = true; busy = false; update(value); capture(null);
+                });
+            }
+        });
+        installInput();
+        FrameLayout.LayoutParams pageArea = new FrameLayout.LayoutParams(-1, -1); pageArea.bottomMargin = dp(48);
+        root.addView(web, pageArea);
+        chrome = new ReaderChrome(this, root, book.title, preferences.paged, BundledBook.includes(this, book.id), preferences.showProgress,
+                new ReaderChrome.Actions() {
+                    public void library() { showChrome(false, false); closeReader(); }
+                    public void contents() { showChrome(false, false); ReaderActivity.this.contents(); }
+                    public void settings() { showChrome(false, false); capture(() -> startActivity(new Intent(ReaderActivity.this, ReadingSettingsActivity.class))); }
+                    public void page(int direction) { if (!exploring()) showChrome(false, false); turn(direction); }
+                    public void chapter(int direction) { if (!exploring()) showChrome(false, false); ReaderActivity.this.chapter(direction); }
+                    public void source() { showChrome(false, false); capture(() -> startActivity(new Intent(ReaderActivity.this, BundledBookActivity.class))); }
+                }, () -> { showChrome(false, false); web.requestFocus(); }, () -> showChrome(true, true));
+        progress = chrome.progress;
+        chrome.reserveFallback(web);
+        progress.addTextChangedListener(new android.text.TextWatcher() {
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                chrome.label(s);
+                if (s.toString().startsWith("Could not") || s.toString().contains("unavailable")) showChrome(true, false);
+            }
+            public void afterTextChanged(android.text.Editable value) { }
+        });
+        applyChrome(false);
+        setContentView(root); styleKey = preferences.css(appearance) + preferences.paged;
+        web.addOnLayoutChangeListener((v, l, t, r, b, ol, ot, or, ob) -> {
+            if (ready && ((r - l) != (or - ol) || (b - t) != (ob - ot))) {
+                // Last text anchor predates geometry change; do not replace it with new pixel geometry.
+                load(path, position.offset, "");
+            }
+        });
+    }
+    private boolean exploring() { return accessibility != null && accessibility.isTouchExplorationEnabled(); }
+    private void applyChrome(boolean announce) { if (chrome != null) { chrome.progressPreference(preferences.showProgress); chrome.visibility(chromeState.shown(), announce); } }
+    private void showChrome(boolean shown, boolean announce) { if (tap != null) tap.cancel(); chromeState.show(shown); applyChrome(announce); }
+    private interface HitCallback { void result(boolean interactive, boolean selection); }
+    private void hit(float x, float y, HitCallback callback) {
+        if (web == null || !ready || web.getWidth() == 0 || web.getHeight() == 0) { callback.result(true, true); return; }
+        final ReaderWebView target = web; final int ticket = generation;
+        web.evaluateJavascript("BWInput.hit(" + Float.toString(x / web.getWidth()) + "," + Float.toString(y / web.getHeight()) + ")", value -> {
+            if (destroyed || !foreground || target != web || ticket != generation) return;
+            try { JSONObject data = new JSONObject(value); callback.result(data.getBoolean("interactive"), data.getBoolean("selection")); }
+            catch (JSONException unsafe) { callback.result(true, true); } // Fail closed; native controls remain available.
+        });
+    }
+    private void confirmedTap(android.view.MotionEvent event) {
+        final ReaderTap current = tap;
+        if (!ready || busy || !foreground || current == null || !current.eligible() || current.downTime != event.getDownTime() || tapGeneration != generation || exploring()) return;
+        int slop = ViewConfiguration.get(this).getScaledTouchSlop();
+        if (Math.abs(web.getScrollY() - tapScrollY) > slop || Math.abs(web.getScrollX() - tapScrollX) > slop) { current.cancel(); return; }
+        WebView.HitTestResult nativeHit = web.getHitTestResult();
+        if (nativeHit != null && nativeHit.getType() != WebView.HitTestResult.UNKNOWN_TYPE && nativeHit.getType() != WebView.HitTestResult.IMAGE_TYPE) return;
+        hit(tapX, tapY, (interactive, selected) -> {
+            if (current != tap || !ready || busy || web == null) return;
+            ReaderTap.Action action = current.action(web.getWidth(), preferences.paged, exploring(), interactive, selected || web.selecting());
+            if (action == ReaderTap.Action.TOGGLE) { chromeState.toggle(); applyChrome(chromeState.shown()); }
+            else if (action == ReaderTap.Action.PREVIOUS || action == ReaderTap.Action.NEXT) { showChrome(false, false); turn(action == ReaderTap.Action.PREVIOUS ? -1 : 1); }
+            else if (current.eligible() && !interactive && !selected && !web.selecting() && !preferences.paged && !exploring()) showChrome(false, false);
+        });
+    }
+    @android.annotation.SuppressLint("ClickableViewAccessibility") // Observer always returns false; WebView owns clicks/selection. Accessible native alternatives are always reachable.
+    private void installInput() {
+        GestureDetector detector = new GestureDetector(this, new GestureDetector.SimpleOnGestureListener() {
+            @Override public boolean onDown(MotionEvent event) { return true; }
+            @Override public boolean onSingleTapConfirmed(MotionEvent event) { confirmedTap(event); return false; }
+            @Override public boolean onDoubleTap(MotionEvent event) { if (tap != null) tap.cancel(); return false; }
+            @Override public void onLongPress(MotionEvent event) { if (tap != null) tap.cancel(); }
+        });
+        web.setOnTouchListener((view, event) -> {
+            int action = event.getActionMasked();
+            if (action == MotionEvent.ACTION_DOWN) {
+                tap = new ReaderTap(event.getX(), event.getY(), event.getDownTime(), ViewConfiguration.get(this).getScaledTouchSlop(), web.selecting()); tapGeneration = generation;
+                tapScrollX = web.getScrollX(); tapScrollY = web.getScrollY();
+                ReaderTap current = tap;
+                hit(event.getX(), event.getY(), (interactive, selected) -> { if (current == tap && (interactive || selected)) current.block(); });
+            } else if (tap != null) {
+                if (event.getPointerCount() > 1 || action == MotionEvent.ACTION_CANCEL || action == MotionEvent.ACTION_POINTER_DOWN) tap.cancel();
+                else if (action == MotionEvent.ACTION_MOVE) {
+                    tap.move(event.getX(), event.getY());
+                    if (tap.moved() && !web.selecting() && !exploring()) showChrome(false, false);
+                } else if (action == MotionEvent.ACTION_UP) {
+                    tapX = event.getX(); tapY = event.getY(); tap.finish(tapX, tapY, event.getEventTime(), ViewConfiguration.getLongPressTimeout());
+                    if (!preferences.paged) handler.postDelayed(() -> capture(null), 250);
+                }
+            }
+            detector.onTouchEvent(event);
+            return false;
+        });
+    }
+    private String localUrl(String reference) { try { return EpubHtml.url(book.id, reference); } catch (IOException bad) { return ""; } }
+    private WebResourceResponse resource(String url) {
+        try {
+            Uri uri = Uri.parse(url);
+            if (!"https".equals(uri.getScheme()) || !"bookworm.invalid".equals(uri.getHost()) || uri.getPort() != -1 || uri.getUserInfo() != null) return blocked();
+            String prefix = "/" + book.id + "/", local = uri.getPath();
+            if (local == null || !local.startsWith(prefix) || uri.getQuery() != null) return blocked();
+            local = local.substring(prefix.length()); File file = book.content(local);
+            if (book.chapters.contains(local) || local.matches("(?i).*\\.(xhtml|html|htm)")) {
+                byte[] html = EpubHtml.chapter(book, local, readerCss).getBytes("UTF-8");
+                return new WebResourceResponse("text/html", "UTF-8", new ByteArrayInputStream(html));
+            }
+            if (EpubParser.isRaster(local) && claimImage(local, file)) {
+                String lower = local.toLowerCase(Locale.US), mime = lower.endsWith("png") ? "image/png" : lower.endsWith("gif") ? "image/gif" : lower.endsWith("webp") ? "image/webp" : "image/jpeg";
+                return new WebResourceResponse(mime, null, new FileInputStream(file));
+            }
+        } catch (Exception bad) { /* Every failure returns a response; never fall back to the network or filesystem. */ }
+        return blocked();
+    }
+    private WebResourceResponse blocked() { return new WebResourceResponse("text/plain", "UTF-8", 403, "Blocked", Collections.emptyMap(), new ByteArrayInputStream(new byte[0])); }
+    private boolean claimImage(String local, File file) {
+        int pixels = CoverImages.pixels(file); if (pixels == 0) return false;
+        synchronized (imagePaths) {
+            if (imagePaths.contains(local)) return true;
+            if (imagePixels + pixels > 8000000) return false;
+            imagePixels += pixels; imagePaths.add(local); return true;
+        }
+    }
+    private void load(String chapter, int offset, String fragment) {
+        if (web == null || destroyed) return;
+        ready = false; busy = true; generation++; path = chapter; targetOffset = offset; targetFragment = fragment;
+        synchronized (imagePaths) { imagePixels = 0; imagePaths.clear(); }
+        readerCss = preferences.css(appearance); progress.setText("Loading chapter…");
+        web.loadUrl(localUrl(path));
+    }
+    private void update(String value) {
+        try {
+            JSONObject data = new JSONObject(value); int offset = data.getInt("offset");
+            position = new ReadingPosition(path, offset);
+            int index = book.chapters.indexOf(path);
+            String label = index < 0 ? "Linked section" : "Chapter " + (index + 1) + "/" + book.chapters.size() + " · approx. " + Math.min(100, Math.round(100 * (index + data.optDouble("fraction", 0)) / book.chapters.size())) + "%";
+            progress.setText(label + (preferences.paged ? " · page " + data.optInt("page", 1) + "/" + data.optInt("pages", 1) : " · scroll"));
+        } catch (JSONException failed) { progress.setText("Reader layout unavailable. Try reopening this chapter."); ready = false; busy = false; }
+    }
+    private void persist(ReadingPosition anchor) {
+        if (queuedPosition != null && queuedPosition.chapter.equals(anchor.chapter) && queuedPosition.offset == anchor.offset) return;
+        queuedPosition = anchor;
+        disk.execute(() -> { try { anchor.save(book.directory); } catch (IOException failed) { runOnUiThread(() -> { if (!destroyed) progress.setText("Could not save reading position."); }); } });
+    }
+    private void capture(Runnable after) {
+        if (!ready || web == null || destroyed) { if (after != null) after.run(); return; }
+        final int ticket = generation;
+        web.evaluateJavascript("BW.position()", value -> {
+            if (!destroyed && ticket == generation) { update(value); if (ready) persist(position); }
+            if (after != null && !destroyed && ticket == generation) after.run();
+        });
+    }
+    private void turn(int direction) {
+        if (!ready || busy) return; busy = true;
+        web.evaluateJavascript("BW.turn(" + direction + ")", value -> {
+            busy = false;
+            try { int boundary = new JSONObject(value).getInt("boundary");
+                if (boundary != 0) chapterAtBoundary(boundary); else capture(null);
+            } catch (JSONException failed) { toast("Could not turn page."); }
+        });
+    }
+    private void chapterAtBoundary(int direction) {
+        int index = book.chapters.indexOf(path), next = index + direction;
+        if (index < 0 || next < 0 || next >= book.chapters.size()) { toast(direction < 0 ? "Start of book or linked section" : "End of book or linked section"); return; }
+        capture(() -> load(book.chapters.get(next), direction < 0 ? -1 : 0, ""));
+    }
+    private void chapter(int direction) {
+        if (!ready || busy) return;
+        int index = book.chapters.indexOf(path), next = index + direction;
+        if (index < 0 || next < 0 || next >= book.chapters.size()) { toast("No chapter in that direction"); return; }
+        capture(() -> load(book.chapters.get(next), 0, ""));
+    }
+    private void follow(String url) {
+        if (!ready || busy) return;
+        try {
+            Uri uri = Uri.parse(url); String prefix = "/" + book.id + "/";
+            if (!"https".equals(uri.getScheme()) || !"bookworm.invalid".equals(uri.getHost()) || uri.getPort() != -1 || uri.getUserInfo() != null || uri.getQuery() != null || uri.getPath() == null || !uri.getPath().startsWith(prefix)) { toast("External links are disabled"); return; }
+            String local = uri.getPath().substring(prefix.length());
+            if ((!book.chapters.contains(local) && !local.matches("(?i).*\\.(xhtml|html|htm)")) || !book.content(local).isFile()) { toast("Unsupported local link"); return; }
+            capture(() -> { if (history.size() >= 64) history.removeLast(); history.push(position); load(local, 0, uri.getFragment() == null ? "" : uri.getFragment()); });
+        } catch (Exception bad) { toast("Cannot open that link"); }
+    }
+    private void contents() {
+        if (!ready || busy) return;
+        boolean hasToc = !book.tocLinks.isEmpty(); String[] labels = new String[hasToc ? book.tocLinks.size() : book.chapters.size()];
+        for (int i = 0; i < labels.length; i++) labels[i] = hasToc ? book.tocLabels.get(i) : "Chapter " + (i + 1);
+        new AlertDialog.Builder(this).setTitle(hasToc ? "Table of contents" : "Chapters (no table of contents)").setItems(labels, (dialog, selected) -> {
+            String link = hasToc ? book.tocLinks.get(selected) : book.chapters.get(selected);
+            follow(localUrl(link));
+        }).setNegativeButton("Cancel", null).show();
+    }
+    private void toast(String message) { Toast.makeText(this, message, Toast.LENGTH_SHORT).show(); }
+    private void closeReader() { capture(() -> finish()); }
+    @Override public void onBackPressed() {
+        if (web != null && web.finishSelection()) return;
+        if (chrome != null && chromeState.shown()) { showChrome(false, false); web.requestFocus(); return; }
+        if (web != null && !history.isEmpty()) capture(() -> { ReadingPosition previous = history.pop(); load(previous.chapter, previous.offset, ""); });
+        else closeReader();
+    }
+    @Override protected void onResume() {
+        super.onResume(); foreground = true; loadAppearance(); preferences = ReaderPreferences.load(this);
+        chromeState.preference(preferences.controlsOnOpen); chromeState.accessibility(exploring());
+        if (web != null) {
+            disk.execute(() -> { try { LibraryFiles.markRead(book.directory, System.currentTimeMillis()); } catch (IOException ignored) { /* Position saving remains independent. */ } });
+            web.onResume(); String next = preferences.css(appearance) + preferences.paged;
+            if (!next.equals(styleKey)) {
+                styleKey = next; ReadingPosition anchor = position;
+                disposeWeb(); createReader(); load(anchor.chapter, anchor.offset, "");
+            }
+        }
+        applyChrome(exploring());
+        handler.removeCallbacks(autosave); handler.postDelayed(autosave, 1500);
+    }
+    @Override protected void onPause() { foreground = false; if (tap != null) tap.cancel(); handler.removeCallbacks(autosave); capture(null); if (web != null) web.onPause(); super.onPause(); }
+    @Override protected void onSaveInstanceState(Bundle state) {
+        if (position != null) { state.putString("chapter", position.chapter); state.putInt("offset", position.offset); }
+        state.putBoolean("chromeShown", chromeState.shown());
+        super.onSaveInstanceState(state);
+    }
+    @Override protected void onDestroy() {
+        destroyed = true; handler.removeCallbacksAndMessages(null); disposeWeb();
+        if (accessibility != null) accessibility.removeTouchExplorationStateChangeListener(explorationListener);
+        disk.shutdown(); super.onDestroy();
+    }
+    private void disposeWeb() {
+        ready = false;
+        if (web != null) {
+            web.stopLoading();
+            if (web.getParent() instanceof android.view.ViewGroup) ((android.view.ViewGroup) web.getParent()).removeView(web);
+            web.destroy(); web = null;
+        }
+    }
+}

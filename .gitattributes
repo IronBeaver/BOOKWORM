@@ -1,0 +1,8 @@
+# Preserve archived source bytes, including existing mixed line endings.
+# A future normalization change should be reviewed separately.
+* -text
+*.epub binary
+*.jar binary
+*.png binary
+*.jpg binary
+*.jpeg binary

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="global_cover_auto" type="id" />
+    <item name="global_cover_original" type="id" />
+    <item name="global_cover_leather" type="id" />
+    <item name="cover_follow" type="id" />
+    <item name="cover_original" type="id" />
+    <item name="cover_leather" type="id" />
+    <item name="cover_identity" type="id" />
+    <item name="cover_burgundy" type="id" />
+    <item name="cover_forest" type="id" />
+    <item name="cover_navy" type="id" />
+    <item name="cover_cognac" type="id" />
+    <item name="cover_charcoal" type="id" />
+    <item name="cover_plum" type="id" />
+</resources>

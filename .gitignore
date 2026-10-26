@@ -1,0 +1,53 @@
+# Local tools, caches, validation worktrees and preserved private archives
+.gradle/
+.gradle-user-home/
+**/build/
+/local-tools/
+/local-backups/
+/local-validation/
+/releases/
+/milestones/
+
+# Machine-specific settings, IDE and Windows metadata
+local.properties
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Signing materials and credentials: never commit, even temporarily
+*.keystore
+*.jks
+*.p12
+*.pfx
+*.pem
+*.key
+.env
+.env.*
+key.properties
+keystore.properties
+signing.properties
+credentials.json
+
+# Generated packages, downloads, personal libraries and device logs
+*.apk
+*.aab
+*.apks
+*.aar
+*.zip
+*.7z
+*.part
+*.tmp
+*.log
+*.hprof
+/library/
+/downloads/
+/device-logs/
+*.epub
+!app/src/main/assets/books/frankenstein.epub
+
+# The verified Gradle wrapper is required; other downloaded jars are local tools
+*.jar
+!gradle/wrapper/gradle-wrapper.jar

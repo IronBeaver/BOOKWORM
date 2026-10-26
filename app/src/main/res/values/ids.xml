@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="mode_scroll" type="id" />
+    <item name="mode_pages" type="id" />
+    <item name="read_serif" type="id" />
+    <item name="read_sans" type="id" />
+    <item name="read_size" type="id" />
+    <item name="read_margin" type="id" />
+    <item name="read_spacing" type="id" />
+    <item name="font_serif" type="id" />
+    <item name="font_sans" type="id" />
+    <item name="layout_grid" type="id" />
+    <item name="layout_classic" type="id" />
+    <item name="color_background" type="id" />
+    <item name="color_text" type="id" />
+    <item name="color_accent" type="id" />
+    <item name="font_size" type="id" />
+</resources>

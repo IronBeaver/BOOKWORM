@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="reader_controls_default" type="id" />
+    <item name="reader_show_progress" type="id" />
+</resources>

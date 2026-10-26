@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">BOOKWORM</string>
+    <string name="welcome_subtitle">Your library. Your rules.</string>
+    <string name="preset_selected">Preset selected. Tap Apply to save.</string>
+    <string name="low_contrast">These colours have too little contrast. Use a preset or adjust the colours before applying.</string>
+    <string name="save_failed">Could not save appearance. Please try again.</string>
+</resources>
