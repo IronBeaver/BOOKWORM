@@ -34,6 +34,27 @@ review https://www.gutenberg.org/policy/license.html and obtain any required
 permission. The included work is not covered by any separate license that may be
 chosen for BOOKWORM application code.
 
+## v1.2 online discovery and user-selected acquisition
+
+Gutendex (https://gutendex.com/) is an independent JSON catalog API derived from
+Project Gutenberg metadata. It is not an official Project Gutenberg API.
+BOOKWORM uses the API without bundling Gutendex server code; no Gutendex code or
+new runtime library dependency is distributed. Its author recommends a separately
+operated instance for long-term use; the public instance is used for this personal build.
+
+Project Gutenberg books are generally free of US copyright restrictions. Users
+outside the US must check their local copyright laws before downloading. The
+catalog's copyright classification is not a warranty for another jurisdiction.
+No affiliation, endorsement or ownership of Gutenberg books/artwork is claimed.
+Each acquired EPUB remains unmodified, including embedded notices and license.
+Public book references use https://www.gutenberg.org/ebooks/ID.
+
+Access policy/API sources and implementation limits are documented in
+[docs/GUTENBERG-ACCESS.md](docs/GUTENBERG-ACCESS.md). These should be reviewed before
+public distribution or increased usage. No scraping, bulk acquisition or mirror
+service is part of BOOKWORM. Local JSON test adapters use existing development-tool
+libraries only; they are not included in the Android APK.
+
 ## Build tooling and original application code
 
 The original BOOKWORM implementation is MIT, copyright 2026 Norm R Langevin.

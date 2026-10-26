@@ -11,8 +11,8 @@ android {
         applicationId 'com.bookworm.reader'
         minSdk 22
         targetSdk 35
-        versionCode 8
-        versionName '1.0'
+        versionCode 10
+        versionName '1.2'
     }
 
     compileOptions {

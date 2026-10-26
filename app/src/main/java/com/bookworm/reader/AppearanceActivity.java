@@ -18,10 +18,11 @@ public final class AppearanceActivity extends ThemedActivity {
     private EditText background, foreground, accent;
     private RadioGroup fonts, layouts;
     private RadioGroup covers;
+    private android.widget.CheckBox depth;
     private SeekBar size;
     private TextView sizeLabel, error;
     private static final int SERIF = R.id.font_serif, SANS = R.id.font_sans,
-            GRID = R.id.layout_grid, CLASSIC = R.id.layout_classic;
+            GRID = R.id.layout_grid, CLASSIC = R.id.layout_classic, SPINES = R.id.layout_spines;
 
     @Override protected void onCreate(Bundle state) {
         super.onCreate(state); loadAppearance();
@@ -62,7 +63,13 @@ public final class AppearanceActivity extends ThemedActivity {
         form.addView(size); updateSizeLabel();
         form.addView(text("Bookshelf layout", true));
         layouts = options(form, "Minimalist grid", GRID, "Classic shelves", CLASSIC);
-        layouts.check(appearance.classic ? CLASSIC : GRID);
+        RadioButton spines=new RadioButton(this); spines.setId(SPINES); spines.setText("Classic shelves · spines (experimental)"); style(spines);
+        spines.setMinHeight(dp(48)); spines.setButtonTintList(ColorStateList.valueOf(appearance.accent)); layouts.addView(spines);
+        BookshelfPreferences shelf=BookshelfPreferences.load(this,appearance.classic);
+        layouts.check(shelf.presentation==PhysicalShelf.Presentation.SPINES ? SPINES : shelf.presentation==PhysicalShelf.Presentation.COVERS ? CLASSIC : GRID);
+        depth=new android.widget.CheckBox(this); depth.setId(R.id.cover_depth); depth.setText("Dimensional cover edges and shadows"); style(depth);
+        depth.setMinHeight(dp(48)); depth.setButtonTintList(ColorStateList.valueOf(appearance.accent)); depth.setChecked(shelf.depth); form.addView(depth);
+        form.addView(text("Spine view is experimental. Tap a spine to select, then Read; long press or use the panel menu for options. Full metadata is available in Book details.",false));
         form.addView(text("The BOOKWORM Bindery", true));
         form.addView(text("Global cover policy. AUTO and ORIGINAL both prefer usable EPUB art and otherwise generate leather. Each book can override this policy in Cover options.", false));
         covers = new RadioGroup(this);
@@ -92,6 +99,7 @@ public final class AppearanceActivity extends ThemedActivity {
             layouts.check(state.getInt("draftLayout", GRID));
             size.setProgress(state.getInt("draftSize", 4));
             covers.check(state.getInt("draftCover", coverIds[CoverRepository.global(this).ordinal()]));
+            depth.setChecked(state.getBoolean("draftDepth",shelf.depth));
         }
     }
 
@@ -138,7 +146,7 @@ public final class AppearanceActivity extends ThemedActivity {
         Integer fg = readColor(foreground); if (fg == null) return;
         Integer ac = readColor(accent); if (ac == null) return;
         ThemeSettings value = new ThemeSettings(bg, fg, ac, fonts.getCheckedRadioButtonId() == SERIF,
-                size.getProgress() + 14, layouts.getCheckedRadioButtonId() == CLASSIC);
+                size.getProgress() + 14, layouts.getCheckedRadioButtonId() != GRID);
         if (!value.readable()) {
             error.setText(R.string.low_contrast);
             return;
@@ -148,6 +156,9 @@ public final class AppearanceActivity extends ThemedActivity {
         if (!ThemeStore.save(this, value, policy)) {
             error.setText(R.string.save_failed); return;
         }
+        PhysicalShelf.Presentation presentation=layouts.getCheckedRadioButtonId()==SPINES ? PhysicalShelf.Presentation.SPINES
+                : layouts.getCheckedRadioButtonId()==CLASSIC ? PhysicalShelf.Presentation.COVERS : PhysicalShelf.Presentation.GRID;
+        if(!new BookshelfPreferences(presentation,depth.isChecked()).save(this)) { error.setText(R.string.save_failed); return; }
         Toast.makeText(this, "Appearance saved", Toast.LENGTH_SHORT).show(); finish();
     }
     @Override protected void onSaveInstanceState(Bundle state) {
@@ -158,6 +169,7 @@ public final class AppearanceActivity extends ThemedActivity {
         state.putInt("draftLayout", layouts.getCheckedRadioButtonId());
         state.putInt("draftSize", size.getProgress());
         state.putInt("draftCover", covers.getCheckedRadioButtonId());
+        state.putBoolean("draftDepth",depth.isChecked());
         super.onSaveInstanceState(state);
     }
 }

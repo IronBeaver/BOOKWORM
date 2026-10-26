@@ -1,0 +1,238 @@
+[
+  {
+    "Path": "assets\\reader-input.js",
+    "Hash": "D77D6924FC3B0E5867FBB7E1F0007B5DCF7391D6EB7E3B8EE8FCB9661CA275D9"
+  },
+  {
+    "Path": "assets\\reader.js",
+    "Hash": "1EAD7982EE0A46FB5F041132DDBAA546016EADF0F2CF560CA1D6451FDD72BB6A"
+  },
+  {
+    "Path": "assets\\books\\frankenstein.epub",
+    "Hash": "EB696684C1314092BFE973BE1241AB1F44CDE101AC19BC36A574893DE24016C2"
+  },
+  {
+    "Path": "assets\\books\\gutenberg-license.txt",
+    "Hash": "570A8FBB2F5D7F82090E80E7900B8159D806E5EF72821117FE42E4AFB994FE76"
+  },
+  {
+    "Path": "assets\\books\\gutenberg-notice.txt",
+    "Hash": "BF0B51D2496107134627D277F41F664821B88367E59ABB242DB7E12FF077ACA2"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\AppearanceActivity.java",
+    "Hash": "02A204B279001A9E3D4699DB66E1A8065133A00EE683F9CEC2BD0893509C6C6D"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\BinderyDialog.java",
+    "Hash": "F0DC64F1DEB72614021458E05D4A231452989DC55440D1FBB1935012C4DBEBC1"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\BookCoverView.java",
+    "Hash": "D3D14BAF7389A10F034D91B1DD902E0CDD8B904E0A7566642B92595F64B4C7B0"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\BookDetailsActivity.java",
+    "Hash": "48893F9B5B8078F5BFB705F4356BF4D2F81136034085526F6D2D25CB2E630A66"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\BookshelfAdapter.java",
+    "Hash": "3D3C33A3158B5A5CFDB3A7A8945ECFAF6B2B4A610539A547EBD1EECE81101ED8"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\BookshelfPreferences.java",
+    "Hash": "DC0F66D0352AC93680964D4F669BE621653310E80FD70B8848D3FA1D43677553"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\BundledBook.java",
+    "Hash": "CE29EA491A16ECE4B32C64553780B6BDB5A4CD1A09C75907272D401EB545A464"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\BundledBookActivity.java",
+    "Hash": "BF8503940444338F6DF8D60F6BC98ABADDA9923A52DB9C099E6C96DD00E7CBFB"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\CoverChoice.java",
+    "Hash": "E5AFC948382585EAA400C209F5ABCB3C626108FBC433B953A64BBB1155C5B5CD"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\CoverImages.java",
+    "Hash": "B4D2D64D5BBDC00FA9E29D599F7AF37BDEB25C9490C04426D21D51EA214284BB"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\CoverRepository.java",
+    "Hash": "9289F96A8CE14FC32A4F931EE1D0AB0FD8351D54E37B14A74D44BAA4C24D8ED8"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\CoverThumbnailView.java",
+    "Hash": "66CD8E1D08E3374EABE9821366BF42CA3EF1D5C8C50364830FA9915C5A1E3275"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\CoverTypography.java",
+    "Hash": "F2FA27FC25CC7968E2381EED68E98E28F736B7293F859F78CABACE260EA776C7"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\DemoBooks.java",
+    "Hash": "86434C9CCBBD692B473690500C2965A2E492B18CDE7F1191CF3EA48B1C1201F6"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\DimensionalCoverView.java",
+    "Hash": "E0F82992D67DA20DADDFCFA43B522B4039AB27C30C30CCF5488F7150C320354F"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\EpubBook.java",
+    "Hash": "40C8C32FA5EDDD6E1B6C836E3D6787C59DA399A4231F6EBD0F9CABEE4CBF3FB6"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\EpubHtml.java",
+    "Hash": "3156CB2C6891A63359E45AE684330B019E18ADEC44EAF6868DA8064E523A05BD"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\EpubParser.java",
+    "Hash": "DBB6F98FB02DE32813FB9950C3AF16B44ACB878A7EFA43AF6B625D2904987A31"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\HtmlEntities.java",
+    "Hash": "6EFE8EE2A5CCAC3E2FE20A144B37A4D9F4BE7B04A0A7B388AC092BD82EB3DE5C"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\ImportActivity.java",
+    "Hash": "A4F8C77E6E14AE387E8DF703B556A4FAEDBC3197C9108163E15079DE3689A1C5"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\LeatherArt.java",
+    "Hash": "EE8707179D708E1254639F6DC7E6071053F531A253EEA797479F3BC2E1220157"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\LeatherCoverRenderer.java",
+    "Hash": "5B66A8B726FECECB95403A41D8B2E7747B07682B6E710E74AE4687AA64A35137"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\LibraryCatalog.java",
+    "Hash": "D82CC2A825F41F965FF2464E539344C808AB6F350F66EA4A829E839CFFAF9CCF"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\LibraryFiles.java",
+    "Hash": "C9940487AE152362FB05E1BF38309EEDA38BE4A1A350000A1E267FB52C25C2A3"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\LibraryRows.java",
+    "Hash": "930975B245ABF4910F804BFFABE8A2C3827D6161EB9301B18B77651F2332831E"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\LibrarySeeder.java",
+    "Hash": "AF4277B999188101174EF7351780A301A138E6A1600313603FD6AE88A370F041"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\LibrarySort.java",
+    "Hash": "BD921AAB894F4794B8314701DEB20F9914BBC6592FA0B3CE09538F657371B812"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\LibraryStore.java",
+    "Hash": "BEA6ED42D61B68D8A3C1FA4921A8AB0C0EF21B08E48210A1987073C98AD5C8AF"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\MainActivity.java",
+    "Hash": "88B50EEF70A6D34B64871C86B152A7A457F5DECDCEF72922CC8F112AEE0D4324"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\PhysicalShelf.java",
+    "Hash": "BC947565FCBF409D74AD3E8F9B76B96C8CB17F16458BC9E03676B446A19A5D6C"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\ReaderActivity.java",
+    "Hash": "D477B8637012CABA24C753FE319441CDE32A11EAD5500440736DAFA975F4FF7F"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\ReaderChrome.java",
+    "Hash": "71C5B7DE5263C69D523AD70A5FEC37DBE56D32E5D3AEE84DAE0E74F4EB0BB4ED"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\ReaderChromeState.java",
+    "Hash": "5B915243D2226312A6DC214757E83B79D51390317B60C40ED2DAEA3B9466B122"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\ReaderPreferences.java",
+    "Hash": "9840CA0BF3E8FC560587E744E9A29020D3C0DA41E75129472C34D8561920DCE6"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\ReaderTap.java",
+    "Hash": "7888A621B4C4023E62BD1051431D453963E394C315FA13A0D6CB4BA11D2C48A0"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\ReaderWebView.java",
+    "Hash": "9B8283E1E7A34468688054C63BFEDCFDAD76D83E86FF433BDD178303CE3DA11E"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\ReadingPosition.java",
+    "Hash": "6E99EA830D2C884EA38EA930FFA02B18B800BFF2D97B507408818AF3C7F82E03"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\ReadingSettingsActivity.java",
+    "Hash": "11580C35DC22B3BEE18D594B9393F11B55E58526E938D75BBAA7AF22A7E8C61C"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\ShelfIcon.java",
+    "Hash": "D12E44D6BBCA6F924D191066CD52E3C475E62218F1BC3EC7E1BEF22657C9BEEE"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\ShelfPresentation.java",
+    "Hash": "AE36DDFDD5FEAAEF0FBD478A5E0CC65A87F09686433560AE5DB46A79CB253EF3"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\ShelfUi.java",
+    "Hash": "F5D1EAA52D7C42111DBBC414E9D75FCD30497A399D24073219A769AF2EED9AB5"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\ShelfView.java",
+    "Hash": "4037DA9409681CD43AD37EFD1836598C913BAA49DA0352D93877E44A8D971858"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\SpineTypography.java",
+    "Hash": "9B3144F95C95E5BB2556C6AF7EF6614C132F9A5C7BDD67EEB4C493FDAA5E27F0"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\SpineView.java",
+    "Hash": "B6CE3732D8F97FFF2DDF2150B840BCA3F2D77EE2E6DC4EF3A759FE36BD105057"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\ThemedActivity.java",
+    "Hash": "B97CCA70A22030C04C600E97BF236BDD0543097C076E94FECFD907CA820AC01E"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\ThemeSettings.java",
+    "Hash": "AEADB23ADD30FD2766CDC278796E3E0875768D2EECE5096250C69DEC6EAD904F"
+  },
+  {
+    "Path": "java\\com\\bookworm\\reader\\ThemeStore.java",
+    "Hash": "56E18C691603B0285B280DC7F6FBD53C9DE4940852C43C0F21B0EB2ED8D4330F"
+  },
+  {
+    "Path": "res\\drawable\\ic_bookworm.xml",
+    "Hash": "BA6CFDBE317F7912106A1794E3C1266C5DDD8308F89381C615E0CCC94217A185"
+  },
+  {
+    "Path": "res\\values\\cover_ids.xml",
+    "Hash": "830FB613D47F66062DE773D9A69444B2D3E62F3EACF5538689AC50912D1D3063"
+  },
+  {
+    "Path": "res\\values\\ids.xml",
+    "Hash": "45EE5BD4D8A76F088F87269FCF2D89B1AE25D97A4CB72CF1756FE2C850C937C0"
+  },
+  {
+    "Path": "res\\values\\physical_shelf_ids.xml",
+    "Hash": "E3B333625432F47FF70EA7B687A66606E4AF63EF9DCEA29FE124C4D217EBD742"
+  },
+  {
+    "Path": "res\\values\\reader_chrome_ids.xml",
+    "Hash": "16532EB2B670826958811B21750EF1E71EDE338F9BA49D12A4F0CC13EF624C41"
+  },
+  {
+    "Path": "res\\values\\strings.xml",
+    "Hash": "809D92500F91858134D5E7358CA48E6916150A715B1269EF4FCE5B554A340CE7"
+  },
+  {
+    "Path": "res\\values\\styles.xml",
+    "Hash": "E38CC8DC45D0940C008C6EA4E64DE2F4053BF7707617F5CE446298141EE42E35"
+  }
+]

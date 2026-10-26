@@ -5,6 +5,7 @@ $projectRoot = Split-Path $PSScriptRoot -Parent
 & (Join-Path $PSScriptRoot 'check-bindery-contracts.ps1')
 & (Join-Path $PSScriptRoot 'check-ui-polish.ps1')
 & (Join-Path $PSScriptRoot 'check-immersive-reader.ps1')
+& (Join-Path $PSScriptRoot 'check-physical-shelf.ps1')
 $testOutput = Join-Path $projectRoot 'app\build\model-tests'
 New-Item -ItemType Directory -Force $testOutput | Out-Null
 $javaBin = Join-Path $env:JAVA_HOME 'bin'
@@ -38,3 +39,4 @@ try {
     & "$javaBin\java.exe" -cp $testOutput com.bookworm.reader.ReaderInputTests
     if ($LASTEXITCODE -ne 0) { throw 'Reader input tests failed' }
 } finally { Pop-Location }
+& (Join-Path $PSScriptRoot 'run-gutenberg-tests.ps1')

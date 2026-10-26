@@ -1,0 +1,4 @@
+<resources>
+    <item name="layout_spines" type="id" />
+    <item name="cover_depth" type="id" />
+</resources>

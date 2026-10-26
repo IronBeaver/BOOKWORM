@@ -16,7 +16,7 @@ $checks = @(
     @{Name='Long press and accessible overflow both open options'; Pass=($adapter -match 'setOnLongClickListener') -and ($adapter -match 'ShelfIcon.Kind.MORE') -and ($adapter -match 'Book options for')},
     @{Name='No persistent Cover options button'; Pass=$adapter -notmatch 'button\("Cover options"'},
     @{Name='Options retain Read/Bindery/details/cancel'; Pass=($main -match 'new String\[\]\{"Read", "Cover options", "Book details"\}') -and ($main -match 'BinderyDialog.show') -and ($main -match 'setNegativeButton\("Cancel"')},
-    @{Name='Options preserve live cover refresh'; Pass=$main -match 'BinderyDialog.show\(this, book, adapter::notifyDataSetChanged\)'},
+    @{Name='Options preserve live cover refresh including selected panel'; Pass=$main -match 'BinderyDialog.show\(this, book, \(\) -> \{ adapter.notifyDataSetChanged\(\); restoreSelection\(\); \}\)'},
     @{Name='Settings groups present'; Pass=($settings -match 'section\(groups, "Appearance"') -and ($settings -match 'section\(groups, "Bookshelf"') -and ($settings -match 'section\(groups, "Reading"') -and ($settings -match 'section\(groups, "About"')},
     @{Name='Settings reuses existing canonical preference screens'; Pass=($settings -match 'AppearanceActivity.class') -and ($settings -match 'ReadingSettingsActivity.class') -and ($settings -notmatch '\.edit\(')},
     @{Name='Shelf-layout route scrolls existing control without a duplicate preference'; Pass=($settings -match 'putExtra\("focus_bookshelf", true\)') -and ($appearance -match 'getBooleanExtra\("focus_bookshelf", false\)')},

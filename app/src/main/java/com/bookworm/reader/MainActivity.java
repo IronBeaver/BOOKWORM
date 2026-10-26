@@ -13,6 +13,8 @@ public final class MainActivity extends ThemedActivity {
     private TextView status, empty;
     private Button retry;
     private BookshelfAdapter adapter;
+    private LinearLayout selectionPanel;
+    private String selectedBook;
     private int rowPosition, rowTop;
     private List<EpubBook> books = Collections.emptyList();
     private LibrarySort sort;
@@ -23,7 +25,7 @@ public final class MainActivity extends ThemedActivity {
     @Override protected void onCreate(Bundle state) {
         super.onCreate(state);
         sort = LibrarySort.fromKey(getSharedPreferences("bookshelf", MODE_PRIVATE).getString("sort", LibrarySort.TITLE_ASC.name()));
-        if (state != null) { rowPosition = state.getInt("row"); rowTop = state.getInt("top"); }
+        if (state != null) { rowPosition = state.getInt("row"); rowTop = state.getInt("top"); selectedBook=state.getString("selectedBook"); }
     }
     @Override protected void onResume() {
         super.onResume(); loadAppearance(); buildShelf(); LibraryStore.observe(this::refreshLibrary); refreshLibrary();
@@ -39,6 +41,7 @@ public final class MainActivity extends ThemedActivity {
                 if (isFinishing() || isDestroyed()) return;
                 if (list.getChildCount() > 0) remember();
                 books = snapshot.books; adapter.submit(books, sort);
+                restoreSelection();
                 loaded = true; unavailable = snapshot.unavailable; seedMessage = message; updateSummary();
                 empty.setText("Your library is empty.\nImport an EPUB to begin reading. Use Reload library to retry preparing the included book.");
                 retry.setVisibility(snapshot.unavailable > 0 || !message.isEmpty() ? View.VISIBLE : View.GONE);
@@ -51,7 +54,7 @@ public final class MainActivity extends ThemedActivity {
     }
     @Override protected void onPause() { LibraryStore.observe(null); remember(); super.onPause(); }
     @Override protected void onDestroy() { worker.shutdown(); super.onDestroy(); }
-    @Override protected void onSaveInstanceState(Bundle state) { remember(); state.putInt("row", rowPosition); state.putInt("top", rowTop); super.onSaveInstanceState(state); }
+    @Override protected void onSaveInstanceState(Bundle state) { remember(); state.putInt("row", rowPosition); state.putInt("top", rowTop); state.putString("selectedBook",selectedBook); super.onSaveInstanceState(state); }
     private void buildShelf() {
         LinearLayout root = column(); root.setPadding(dp(12), 0, dp(12), dp(8));
         LinearLayout toolbar = ShelfUi.toolbar(this, "BOOKWORM", false);
@@ -62,14 +65,47 @@ public final class MainActivity extends ThemedActivity {
         status = text("Loading library…", false); status.setTextSize(12); status.setTextColor(ShelfPresentation.muted(appearance)); status.setPadding(dp(8), dp(4), dp(8), dp(4));
         status.setAccessibilityLiveRegion(View.ACCESSIBILITY_LIVE_REGION_POLITE); root.addView(status); if (loaded) updateSummary();
         retry = button("Reload library", v -> refreshLibrary()); retry.setVisibility(View.GONE); root.addView(retry);
+        selectionPanel=new LinearLayout(this); selectionPanel.setOrientation(LinearLayout.HORIZONTAL); selectionPanel.setVisibility(View.GONE);
+        root.addView(selectionPanel,new LinearLayout.LayoutParams(-1,-2));
         FrameLayout frame = new FrameLayout(this);
         list = new ListView(this); list.setDivider(null); list.setCacheColorHint(appearance.background); list.setItemsCanFocus(true);
-        adapter = new BookshelfAdapter(this, this::openBook, this::bookOptions);
+        adapter = new BookshelfAdapter(this, this::openBook, this::bookOptions, this::selectBook);
+        list.addOnLayoutChangeListener((v,l,t,r,b,ol,ot,or,ob) -> adapter.width(r-l-list.getPaddingLeft()-list.getPaddingRight()));
         list.setAdapter(adapter); adapter.submit(books, sort);
         empty = text("Preparing your library…", false); empty.setGravity(android.view.Gravity.CENTER);
         frame.addView(list, new FrameLayout.LayoutParams(-1, -1)); frame.addView(empty, new FrameLayout.LayoutParams(-1, -1)); list.setEmptyView(empty);
         root.addView(frame, new LinearLayout.LayoutParams(-1, 0, 1)); setContentView(root); list.setSelectionFromTop(rowPosition, rowTop);
+        restoreSelection();
     }
+    private void restoreSelection() {
+        if(BookshelfPreferences.load(this,appearance.classic).presentation!=PhysicalShelf.Presentation.SPINES) { dismissSelection(); return; }
+        if(selectedBook!=null) {
+            for(EpubBook book:books) if(book.id.equals(selectedBook)) { selectBook(book); return; }
+            dismissSelection();
+        }
+    }
+    private void selectBook(EpubBook book) {
+        selectedBook=book.id; adapter.selected(book.id); selectionPanel.removeAllViews();
+        selectionPanel.setPadding(dp(8),dp(6),dp(8),dp(6));
+        selectionPanel.setBackgroundColor(ShelfPresentation.blend(appearance.background,appearance.accent,.08f));
+        CoverThumbnailView cover=new CoverThumbnailView(this); cover.bind(book,CoverRepository.global(this),null);
+        selectionPanel.addView(cover,new LinearLayout.LayoutParams(dp(64),dp(96)));
+        LinearLayout information=new LinearLayout(this); information.setOrientation(LinearLayout.VERTICAL); information.setPadding(dp(12),0,0,0);
+        TextView title=text(book.title,false); title.setTextSize(16); title.setMaxLines(2); title.setEllipsize(android.text.TextUtils.TruncateAt.END); information.addView(title);
+        TextView author=text(book.author,false); author.setTextSize(12); author.setSingleLine(true); author.setEllipsize(android.text.TextUtils.TruncateAt.END); information.addView(author);
+        LinearLayout actions=new LinearLayout(this);
+        Button read=button("Read",v -> openBook(book)); actions.addView(read,new LinearLayout.LayoutParams(0,-2,1));
+        actions.addView(ShelfUi.action(this,ShelfIcon.Kind.MORE,"Book options for "+book.title,v -> bookOptions(book)),new LinearLayout.LayoutParams(dp(48),dp(48)));
+        actions.addView(ShelfUi.action(this,ShelfIcon.Kind.BACK,"Dismiss selected book",v -> dismissSelection()),new LinearLayout.LayoutParams(dp(48),dp(48)));
+        information.addView(actions); selectionPanel.addView(information,new LinearLayout.LayoutParams(0,-2,1));
+        selectionPanel.setVisibility(View.VISIBLE); selectionPanel.setContentDescription("Selected book: "+book.title+", by "+book.author);
+        selectionPanel.announceForAccessibility(selectionPanel.getContentDescription());
+    }
+    private void dismissSelection() {
+        selectedBook=null; if(adapter!=null) adapter.selected(null);
+        if(selectionPanel!=null) { selectionPanel.removeAllViews(); selectionPanel.setVisibility(View.GONE); }
+    }
+    @Override public void onBackPressed() { if(selectedBook!=null) dismissSelection(); else super.onBackPressed(); }
     private void chooseSort() {
         LibrarySort[] values = LibrarySort.values(); String[] labels = new String[values.length];
         for (int i = 0; i < values.length; i++) labels[i] = values[i].label;
@@ -95,7 +131,7 @@ public final class MainActivity extends ThemedActivity {
         AlertDialog menu = new AlertDialog.Builder(this).setCustomTitle(ShelfUi.dialogTitle(this, book.title))
                 .setAdapter(ShelfUi.menuAdapter(this, new String[]{"Read", "Cover options", "Book details"}, false), (dialog, choice) -> {
                     if (choice == 0) openBook(book);
-                    else if (choice == 1) BinderyDialog.show(this, book, adapter::notifyDataSetChanged);
+                    else if (choice == 1) BinderyDialog.show(this, book, () -> { adapter.notifyDataSetChanged(); restoreSelection(); });
                     else bookDetails(book);
                 }).setNegativeButton("Cancel", null).create(); ShelfUi.show(this, menu);
     }

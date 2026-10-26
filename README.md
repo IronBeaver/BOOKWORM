@@ -7,8 +7,8 @@ personally modifiable.
 > Anything that might encourage someone to read a single word more should be
 > freely available and personally modifiable.
 
-**This branch: main — stable v1.0, versionCode 8.** This release is identified by
-annotated tag `v1.0.0`. Later v1.1/v1.2 code is on `develop`. Physical shelves have been hardware-tested; catalog
+**This branch: develop — v1.2, versionCode 10.** Stable v1.0 is on `main` and
+annotated tag `v1.0.0`. The physical bookshelf has been hardware-tested; catalog
 networking is experimental and currently times out on the reference tablet.
 Nothing has been published to GitHub yet.
 
@@ -57,7 +57,7 @@ v1.0 requests no network permission. v1.2 adds INTERNET for the catalog; downloa
 
 Both page turning and continuous chapter scrolling are available offline. Native
 centre-tap reader controls, Contents, reading appearance, themes, cover overrides
-and sorting are retained. The stable software supports standard unencrypted reflowable
+and sorting are retained. The software supports standard unencrypted reflowable
 EPUB2/EPUB3; it does not provide PDF, DRM bypass, cloud sync or subscriptions.
 
 `main` preserves the actual archived v1.0 application source. `develop` is one
