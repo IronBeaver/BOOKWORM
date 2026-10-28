@@ -19,7 +19,9 @@ public final class ReaderActivity extends ThemedActivity {
     private ReaderWebView web;
     private TextView progress;
     private ReaderPreferences preferences;
-    private String path, script, inputScript, styleKey;
+    private String path, script, inputScript, fontScript, styleKey;
+    private volatile String readerFont;
+    private int fontGateGeneration = -1;
     private ReaderChrome chrome;
     private ReaderChromeState chromeState;
     private AccessibilityManager accessibility;
@@ -35,6 +37,7 @@ public final class ReaderActivity extends ThemedActivity {
     private int targetOffset;
     private String targetFragment = "";
     private boolean ready, busy, destroyed;
+    private boolean launchRecorded;
     private int generation;
     private final Handler handler = new Handler(Looper.getMainLooper());
     private final ExecutorService disk = Executors.newSingleThreadExecutor();
@@ -45,7 +48,8 @@ public final class ReaderActivity extends ThemedActivity {
         @Override public void run() { if (!destroyed) { capture(null); handler.postDelayed(this, 1500); } }
     };
     @Override protected void onCreate(Bundle state) {
-        super.onCreate(state); loadAppearance(); preferences = ReaderPreferences.load(this);
+        preferences = ReaderPreferences.load(this); applyPaletteTheme();
+        super.onCreate(state); loadReaderAppearance();
         chromeState = new ReaderChromeState(preferences.controlsOnOpen);
         if (state != null) chromeState.show(state.getBoolean("chromeShown", preferences.controlsOnOpen));
         accessibility = (AccessibilityManager) getSystemService(ACCESSIBILITY_SERVICE);
@@ -59,11 +63,15 @@ public final class ReaderActivity extends ThemedActivity {
             try (InputStream in = getAssets().open("reader-input.js"); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
                 byte[] buffer = new byte[4096]; int n; while ((n = in.read(buffer)) != -1) out.write(buffer, 0, n); inputScript = out.toString("UTF-8");
             }
+            try (InputStream in = getAssets().open("reader-fonts.js"); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+                byte[] buffer = new byte[4096]; int n; while ((n = in.read(buffer)) != -1) out.write(buffer, 0, n); fontScript = out.toString("UTF-8");
+            }
             position = ReadingPosition.load(book.directory, book.chapters.get(0));
             if (state != null) position = new ReadingPosition(state.getString("chapter", position.chapter), state.getInt("offset", position.offset));
             if (!book.content(position.chapter).isFile()) position = new ReadingPosition(book.chapters.get(0), 0);
             createReader(); load(position.chapter, position.offset, "");
         } catch (Exception failed) {
+            if (automaticFallback()) return;
             LinearLayout root = column(); root.addView(text("Could not open EPUB: " + failed.getMessage(), false));
             root.addView(button("Back to bookshelf", v -> finish())); setContentView(root);
         }
@@ -91,9 +99,10 @@ public final class ReaderActivity extends ThemedActivity {
             @Override public void onPageFinished(WebView view, String url) {
                 if (destroyed || !url.equals(localUrl(path))) return;
                 final int ticket = generation;
-                view.evaluateJavascript(script + "\n" + inputScript + "\nBW.init(" + preferences.paged + "," + preferences.margin + "," + targetOffset + "," + JSONObject.quote(targetFragment) + ");", value -> {
-                    if (ticket != generation || destroyed) return;
-                    ready = true; busy = false; update(value); capture(null);
+                if (fontGateGeneration == ticket) return;
+                fontGateGeneration = ticket;
+                view.evaluateJavascript(fontScript + "\nBWFonts.begin(" + JSONObject.quote(ReaderFonts.alias(readerFont)) + ");", value -> {
+                    if (ticket == generation && !destroyed && view == web) waitForFonts(view, ticket);
                 });
             }
         });
@@ -127,6 +136,47 @@ public final class ReaderActivity extends ThemedActivity {
                 load(path, position.offset, "");
             }
         });
+    }
+    private void waitForFonts(WebView view, int ticket) {
+        if (destroyed || ticket != generation || view != web) return;
+        view.evaluateJavascript("BWFonts.status()", value -> {
+            if (destroyed || ticket != generation || view != web) return;
+            try {
+                String status = new JSONObject(value).getString("state");
+                if (status.equals("ready")) {
+                    view.evaluateJavascript(script + "\n" + inputScript + "\nBW.init(" + preferences.paged + "," + preferences.margin + "," + targetOffset + "," + JSONObject.quote(targetFragment) + ");", result -> {
+                        if (ticket != generation || destroyed || view != web) return;
+                        ready = true; busy = false; update(result);
+                        if (ready && !launchRecorded) { ContinueReadingStore.opened(this, book.id); launchRecorded = true; }
+                        if (!ready && automaticFallback()) return;
+                        capture(null);
+                    });
+                } else if (status.equals("pending")) {
+                    // Polling observes readiness; elapsed time never authorizes pagination.
+                    handler.postDelayed(() -> waitForFonts(view, ticket), 50);
+                } else fontUnavailable();
+            } catch (JSONException failure) { fontUnavailable(); }
+        });
+    }
+    private void fontUnavailable() {
+        ready = false; busy = false;
+        if (automaticFallback()) return;
+        progress.setText("Reader font unavailable. Choose a system font in Reading settings.");
+        showChrome(true, false);
+    }
+    private boolean automaticFallback() {
+        if (launchRecorded || !getIntent().getBooleanExtra(ContinueReadingStore.AUTO, false)) return false;
+        toast("Could not continue reading. Your bookshelf is available."); finish(); return true;
+    }
+    private void applyPaletteTheme() {
+        int[] themes = {R.style.AppTheme, R.style.ReaderWarmPaper, R.style.ReaderSoftBlue, R.style.ReaderBlueNight, R.style.ReaderSoftDark};
+        setTheme(themes[ReaderPalettes.index(preferences.paletteId)]);
+    }
+    private void loadReaderAppearance() {
+        loadAppearance(); preferences = ReaderPreferences.load(this); applyPaletteTheme();
+        appearance = ReaderPalettes.resolve(preferences.paletteId, appearance);
+        int bar = ReaderPalettes.systemBar(preferences.paletteId, appearance);
+        getWindow().setStatusBarColor(bar); getWindow().setNavigationBarColor(bar);
     }
     private boolean exploring() { return accessibility != null && accessibility.isTouchExplorationEnabled(); }
     private void applyChrome(boolean announce) { if (chrome != null) { chrome.progressPreference(preferences.showProgress); chrome.visibility(chromeState.shown(), announce); } }
@@ -188,6 +238,8 @@ public final class ReaderActivity extends ThemedActivity {
     private String localUrl(String reference) { try { return EpubHtml.url(book.id, reference); } catch (IOException bad) { return ""; } }
     private WebResourceResponse resource(String url) {
         try {
+            String fontAsset = ReaderFonts.asset(url, readerFont);
+            if (fontAsset != null) return new WebResourceResponse("application/x-font-ttf", null, getAssets().open(fontAsset));
             Uri uri = Uri.parse(url);
             if (!"https".equals(uri.getScheme()) || !"bookworm.invalid".equals(uri.getHost()) || uri.getPort() != -1 || uri.getUserInfo() != null) return blocked();
             String prefix = "/" + book.id + "/", local = uri.getPath();
@@ -217,6 +269,7 @@ public final class ReaderActivity extends ThemedActivity {
         if (web == null || destroyed) return;
         ready = false; busy = true; generation++; path = chapter; targetOffset = offset; targetFragment = fragment;
         synchronized (imagePaths) { imagePixels = 0; imagePaths.clear(); }
+        readerFont = ReaderFonts.selected(preferences.fontId, preferences.serif);
         readerCss = preferences.css(appearance); progress.setText("Loading chapter…");
         web.loadUrl(localUrl(path));
     }
@@ -290,7 +343,7 @@ public final class ReaderActivity extends ThemedActivity {
         else closeReader();
     }
     @Override protected void onResume() {
-        super.onResume(); foreground = true; loadAppearance(); preferences = ReaderPreferences.load(this);
+        super.onResume(); foreground = true; loadReaderAppearance();
         chromeState.preference(preferences.controlsOnOpen); chromeState.accessibility(exploring());
         if (web != null) {
             disk.execute(() -> { try { LibraryFiles.markRead(book.directory, System.currentTimeMillis()); } catch (IOException ignored) { /* Position saving remains independent. */ } });
@@ -299,6 +352,7 @@ public final class ReaderActivity extends ThemedActivity {
                 styleKey = next; ReadingPosition anchor = position;
                 disposeWeb(); createReader(); load(anchor.chapter, anchor.offset, "");
             }
+            if (ready) ContinueReadingStore.opened(this, book.id);
         }
         applyChrome(exploring());
         handler.removeCallbacks(autosave); handler.postDelayed(autosave, 1500);

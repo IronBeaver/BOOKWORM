@@ -4,6 +4,17 @@
     <item name="mode_pages" type="id" />
     <item name="read_serif" type="id" />
     <item name="read_sans" type="id" />
+    <item name="read_monospace" type="id" />
+    <item name="read_garamond" type="id" />
+    <item name="read_literata" type="id" />
+    <item name="read_atkinson" type="id" />
+    <item name="read_bitter" type="id" />
+    <item name="read_palette_appearance" type="id" />
+    <item name="read_palette_paper" type="id" />
+    <item name="read_palette_blue" type="id" />
+    <item name="read_palette_night" type="id" />
+    <item name="read_palette_dark" type="id" />
+    <item name="continue_reading_launch" type="id" />
     <item name="read_size" type="id" />
     <item name="read_margin" type="id" />
     <item name="read_spacing" type="id" />

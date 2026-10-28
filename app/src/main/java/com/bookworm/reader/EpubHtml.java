@@ -65,7 +65,7 @@ public final class EpubHtml {
         if (bodies.isEmpty()) throw new IOException("Chapter has no XHTML body");
         children(bodies.get(0), body, book, path, 0, count);
         return "<!doctype html><html><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1,maximum-scale=1'>"
-                + "<meta http-equiv='Content-Security-Policy' content=\"default-src 'none'; img-src https://bookworm.invalid; style-src 'unsafe-inline'; script-src 'none'; base-uri 'none'; form-action 'none'\">"
+                + "<meta http-equiv='Content-Security-Policy' content=\"default-src 'none'; img-src https://bookworm.invalid; font-src 'self'; style-src 'unsafe-inline'; script-src 'none'; base-uri 'none'; form-action 'none'\">"
                 + "<style>" + styles + readerCss + "</style></head><body><main id='bw-content'>" + body + "</main></body></html>";
     }
     private static void children(Node parent, StringBuilder out, EpubBook b, String path, int depth, int[] count) throws IOException {

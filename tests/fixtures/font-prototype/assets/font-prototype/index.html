@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; font-src 'self'; style-src 'unsafe-inline'; script-src 'none'; base-uri 'none'; form-action 'none'">
+<title>BOOKWORM font compatibility prototype</title>
+<style>
+#FONT_FACES#
+@font-face{font-family:BWDeliberatelyMissing;src:url('fonts/NotApproved.ttf') format('truetype');}
+html,body{margin:0;background:#f5ebd4;color:#30291f;font:16px/1.5 sans-serif;}
+body{padding:16px;word-wrap:break-word;}
+h1{font-size:22px;}h2{font-size:20px;margin-top:32px;border-bottom:1px solid #79664a;}
+h3{font-size:16px;font-weight:normal;}p{margin:12px 0;}
+.specimen{font-size:20px;line-height:1.65;}
+.face-state{display:block;min-height:24px;font:13px/1.5 sans-serif;color:#62430a;}
+.ready{color:#235b33;}.failed{color:#922b21;}
+#gate{min-height:72px;border:1px solid #79664a;padding:8px;font-weight:bold;}
+#negative{font-size:14px;}section{border-bottom:1px solid #d1c1a0;padding-bottom:12px;}
+.probe{position:absolute;left:-20000px;top:0;visibility:hidden;white-space:nowrap;font-size:48px;line-height:normal;}
+</style></head><body>
+<h1>Font compatibility test</h1>
+<p>Debug fixture only. No reader settings, books or reading positions are changed. Long-press sample text to test native selection and handles.</p>
+<p id="gate" role="status" aria-live="polite">Measurement gate closed: waiting for trusted test script.</p>
+<p id="negative">Missing-font negative control: waiting.</p>
+<p>Readiness uses actual text-width changes against three system fallbacks, then three stable rendering frames. No fixed delay opens the gate. This does not run production pagination.</p>
+#SAMPLES#
+<h2>System references</h2>
+<p style="font-family:serif">System Serif: The quiet library. Café, naïve, Łódź.</p>
+<p style="font-family:sans-serif">System Sans: The quiet library. Café, naïve, Łódź.</p>
+<p style="font-family:monospace">System Monospace: The quiet library. Café, naïve, Łódź.</p>
+<p>Unsupported glyphs may use Android fallback or show missing-glyph boxes. Coverage and visual quality must be judged on this device.</p>
+</body></html>

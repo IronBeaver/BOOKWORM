@@ -1,0 +1,26 @@
+[
+  {
+    "SHA256": "c95ed42e1084df50b9b53c18196bb9c21de25b8dbdb232e92d80a55ea1b25c0d",
+    "Path": "app/src/main/assets/reader-fonts.js"
+  },
+  {
+    "SHA256": "133fca550959768dc7b64efa42fb2e6d4c0a2f0571f3a329298bb8e0a221cb08",
+    "Path": "app/src/main/assets/reader.js"
+  },
+  {
+    "SHA256": "d77d6924fc3b0e5867fbb7e1f0007b5dcf7391d6eb7e3b8ee8fcb9661ca275d9",
+    "Path": "app/src/main/assets/reader-input.js"
+  },
+  {
+    "SHA256": "848dd5296ae8f1a30053132eb601d0ce5cd1048b53428c706a19c75c4327567c",
+    "Path": "app/src/main/java/com/bookworm/reader/ReaderFonts.java"
+  },
+  {
+    "SHA256": "6e99ea830d2c884ea38ea930ffa02b18b800bff2d97b507408818af3c7f82e03",
+    "Path": "app/src/main/java/com/bookworm/reader/ReadingPosition.java"
+  },
+  {
+    "SHA256": "dbb6f98fb02de32813fb9950c3af16b44acb878a7efa43af6b625d2904987a31",
+    "Path": "app/src/main/java/com/bookworm/reader/EpubParser.java"
+  }
+]

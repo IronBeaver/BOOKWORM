@@ -3,18 +3,26 @@ import android.content.Intent;
 import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.widget.*;
+import android.app.AlertDialog;
+import java.io.*;
 
 public final class ReadingSettingsActivity extends ThemedActivity {
-    private RadioGroup mode, font;
+    private RadioGroup mode, font, palette;
     private SeekBar size, margin, spacing;
     private ReaderPreferences draft;
-    private CheckBox controls, progress;
+    private CheckBox controls, progress, continueReading;
+    private static final int[] PALETTE_IDS = {R.id.read_palette_appearance, R.id.read_palette_paper,
+            R.id.read_palette_blue, R.id.read_palette_night, R.id.read_palette_dark};
+    private static final int[] FONT_IDS = {R.id.read_serif, R.id.read_sans, R.id.read_monospace,
+            R.id.read_garamond, R.id.read_literata, R.id.read_atkinson, R.id.read_bitter};
     @Override protected void onCreate(Bundle state) {
         super.onCreate(state); loadAppearance(); draft = ReaderPreferences.load(this);
         LinearLayout root = column(); root.addView(text("Reading appearance", true));
         root.addView(button("Back · discard unapplied changes", v -> finish()));
         ScrollView scroll = new ScrollView(this); LinearLayout form = new LinearLayout(this); form.setOrientation(LinearLayout.VERTICAL);
         form.addView(text("Apply changes to reflow the current chapter around your saved text position.", false));
+        continueReading = check(form, "Continue reading on launch", R.id.continue_reading_launch, draft.continueOnLaunch);
+        form.addView(text("On a fresh launch, reopen the last-read book. Returning from the background keeps your current screen.", false));
         form.addView(text("Reading mode", true));
         mode = choices(form, "Continuous chapter scroll", R.id.mode_scroll, "Traditional pages · tap screen edges", R.id.mode_pages);
         mode.check(draft.paged ? R.id.mode_pages : R.id.mode_scroll);
@@ -23,27 +31,55 @@ public final class ReadingSettingsActivity extends ThemedActivity {
         progress = check(form, "Show subtle reading progress", R.id.reader_show_progress, draft.showProgress);
         form.addView(text("Centre tap toggles controls. In page mode, the left and right regions turn pages. Links and text selection take priority. The Controls button and hardware Back remain available.", false));
         form.addView(text("Reading font", true));
-        font = choices(form, "Serif", R.id.read_serif, "Sans-serif", R.id.read_sans);
-        font.check(draft.serif ? R.id.read_serif : R.id.read_sans);
+        font = new RadioGroup(this);
+        for (int i = 0; i < ReaderFonts.count(); i++) {
+            RadioButton option = new RadioButton(this); option.setId(FONT_IDS[i]); option.setText(ReaderFonts.label(i)); style(option);
+            option.setMinHeight(dp(48)); option.setButtonTintList(ColorStateList.valueOf(appearance.accent)); font.addView(option);
+            if (ReaderFonts.id(i).equals(draft.fontId)) font.check(FONT_IDS[i]);
+        }
+        form.addView(font);
+        form.addView(button("Font licenses · SIL OFL 1.1", v -> fontLicenses()));
         size = slider(form, "Font size", 14, 32, draft.size, R.id.read_size, "px");
         margin = slider(form, "Page margins", 8, 40, draft.margin, R.id.read_margin, "px");
         spacing = slider(form, "Line spacing (tenths)", 12, 22, draft.spacing, R.id.read_spacing, " / 10");
+        form.addView(text("Reader colour palette", true));
+        palette = new RadioGroup(this);
+        for (int i = 0; i < ReaderPalettes.count(); i++) {
+            RadioButton option = new RadioButton(this); option.setId(PALETTE_IDS[i]); option.setText(ReaderPalettes.label(i)); style(option);
+            option.setMinHeight(dp(48)); option.setButtonTintList(ColorStateList.valueOf(appearance.accent)); palette.addView(option);
+            if (ReaderPalettes.id(i).equals(draft.paletteId)) palette.check(PALETTE_IDS[i]);
+        }
+        form.addView(palette);
         form.addView(button("Colours · open Appearance", v -> startActivity(new Intent(this, AppearanceActivity.class))));
-        form.addView(text("The reader reuses your saved background, text and accent colours. Colour changes are saved separately in Appearance.", false));
+        form.addView(text("Reader palettes are independent of fonts and application themes. Follow Appearance uses your existing app colours; the other palettes change only the reader.", false));
         scroll.addView(form); root.addView(scroll, new LinearLayout.LayoutParams(-1, 0, 1));
         root.addView(button("Apply reading settings", v -> {
             draft.paged = mode.getCheckedRadioButtonId() == R.id.mode_pages;
             draft.controlsOnOpen = controls.isChecked(); draft.showProgress = progress.isChecked();
-            draft.serif = font.getCheckedRadioButtonId() == R.id.read_serif;
+            draft.continueOnLaunch = continueReading.isChecked();
+            for (int i = 0; i < PALETTE_IDS.length; i++) if (palette.getCheckedRadioButtonId() == PALETTE_IDS[i]) draft.paletteId = ReaderPalettes.id(i);
+            for (int i = 0; i < FONT_IDS.length; i++) if (font.getCheckedRadioButtonId() == FONT_IDS[i]) draft.fontId = ReaderFonts.id(i);
             draft.size = size.getProgress() + 14; draft.margin = margin.getProgress() + 8; draft.spacing = spacing.getProgress() + 12;
             if (draft.save(this)) finish(); else Toast.makeText(this, "Could not save reading settings", Toast.LENGTH_LONG).show();
         }));
         setContentView(root);
         if (state != null) {
             mode.check(state.getInt("mode")); font.check(state.getInt("font"));
+            palette.check(state.getInt("palette", palette.getCheckedRadioButtonId()));
+            continueReading.setChecked(state.getBoolean("continueReading", draft.continueOnLaunch));
             size.setProgress(state.getInt("size")); margin.setProgress(state.getInt("margin")); spacing.setProgress(state.getInt("spacing"));
             controls.setChecked(state.getBoolean("controls", draft.controlsOnOpen)); progress.setChecked(state.getBoolean("progress", draft.showProgress));
         }
+    }
+    private void fontLicenses() {
+        String[] labels = new String[4];
+        for (int i = 0; i < labels.length; i++) labels[i] = ReaderFonts.label(i + 3);
+        new AlertDialog.Builder(this).setTitle("Bundled font licenses").setItems(labels, (dialog, selected) -> {
+            try (InputStream in = getAssets().open(ReaderFonts.license(selected + 3)); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+                byte[] buffer = new byte[4096]; int n; while ((n = in.read(buffer)) != -1) out.write(buffer, 0, n);
+                new AlertDialog.Builder(this).setTitle(labels[selected]).setMessage(out.toString("UTF-8")).setPositiveButton("Close", null).show();
+            } catch (IOException failed) { Toast.makeText(this, "Could not read font license", Toast.LENGTH_LONG).show(); }
+        }).show();
     }
     private RadioGroup choices(LinearLayout form, String a, int aid, String b, int bid) {
         RadioGroup group = new RadioGroup(this); String[] labels = {a,b}; int[] ids = {aid,bid};
@@ -70,6 +106,7 @@ public final class ReadingSettingsActivity extends ThemedActivity {
         form.addView(control); return control;
     }
     @Override protected void onSaveInstanceState(Bundle state) {
+        state.putInt("palette", palette.getCheckedRadioButtonId()); state.putBoolean("continueReading", continueReading.isChecked());
         state.putInt("mode", mode.getCheckedRadioButtonId()); state.putInt("font", font.getCheckedRadioButtonId());
         state.putInt("size", size.getProgress()); state.putInt("margin", margin.getProgress()); state.putInt("spacing", spacing.getProgress());
         state.putBoolean("controls", controls.isChecked()); state.putBoolean("progress", progress.isChecked());

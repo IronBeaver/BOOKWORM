@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Native selection handles/action-mode accents use the same contrast-tested colour as links. -->
+    <style name="ReaderWarmPaper" parent="AppTheme"><item name="android:colorAccent">#795322</item></style>
+    <style name="ReaderSoftBlue" parent="AppTheme"><item name="android:colorAccent">#245478</item></style>
+    <style name="ReaderBlueNight" parent="AppTheme"><item name="android:colorAccent">#FFE0A0</item></style>
+    <style name="ReaderSoftDark" parent="AppTheme"><item name="android:colorAccent">#B9D8FF</item></style>
+</resources>

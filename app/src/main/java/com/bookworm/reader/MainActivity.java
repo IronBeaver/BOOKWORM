@@ -21,16 +21,20 @@ public final class MainActivity extends ThemedActivity {
     private boolean loaded;
     private int unavailable;
     private String seedMessage = "";
+    private LaunchAttempt launchAttempt;
     private final java.util.concurrent.ExecutorService worker = java.util.concurrent.Executors.newSingleThreadExecutor();
     @Override protected void onCreate(Bundle state) {
         super.onCreate(state);
+        launchAttempt = new LaunchAttempt(state == null && isTaskRoot() && Intent.ACTION_MAIN.equals(getIntent().getAction())
+                && getIntent().hasCategory(Intent.CATEGORY_LAUNCHER));
         sort = LibrarySort.fromKey(getSharedPreferences("bookshelf", MODE_PRIVATE).getString("sort", LibrarySort.TITLE_ASC.name()));
         if (state != null) { rowPosition = state.getInt("row"); rowTop = state.getInt("top"); selectedBook=state.getString("selectedBook"); }
     }
     @Override protected void onResume() {
-        super.onResume(); loadAppearance(); buildShelf(); LibraryStore.observe(this::refreshLibrary); refreshLibrary();
+        super.onResume(); launchAttempt.resume(); loadAppearance(); buildShelf(); LibraryStore.observe(this::refreshLibrary); refreshLibrary();
     }
     private void refreshLibrary() {
+        final int launchTicket = launchAttempt.claim();
         worker.execute(() -> {
             String seedError = "";
             try { BundledBook.ensure(getApplicationContext()); }
@@ -46,13 +50,17 @@ public final class MainActivity extends ThemedActivity {
                 empty.setText("Your library is empty.\nImport an EPUB to begin reading. Use Reload library to retry preparing the included book.");
                 retry.setVisibility(snapshot.unavailable > 0 || !message.isEmpty() ? View.VISIBLE : View.GONE);
                 list.setSelectionFromTop(Math.min(rowPosition, Math.max(0, adapter.getCount() - 1)), rowTop);
+                if (launchAttempt.allowed(launchTicket)) {
+                    String id = ContinueReadingStore.begin(this, snapshot, ReaderPreferences.load(this).continueOnLaunch);
+                    if (id != null) startActivity(new Intent(this, ReaderActivity.class).putExtra("book", id).putExtra(ContinueReadingStore.AUTO, true));
+                }
             });
         });
     }
     private void remember() {
         if (list != null && list.getChildCount() > 0) { rowPosition = list.getFirstVisiblePosition(); rowTop = list.getChildAt(0).getTop(); }
     }
-    @Override protected void onPause() { LibraryStore.observe(null); remember(); super.onPause(); }
+    @Override protected void onPause() { launchAttempt.pause(); LibraryStore.observe(null); remember(); super.onPause(); }
     @Override protected void onDestroy() { worker.shutdown(); super.onDestroy(); }
     @Override protected void onSaveInstanceState(Bundle state) { remember(); state.putInt("row", rowPosition); state.putInt("top", rowTop); state.putString("selectedBook",selectedBook); super.onSaveInstanceState(state); }
     private void buildShelf() {

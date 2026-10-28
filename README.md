@@ -12,6 +12,27 @@ annotated tag `v1.0.0`. The physical bookshelf has been hardware-tested; catalog
 networking is experimental and currently times out on the reference tablet.
 Nothing has been published to GitHub yet.
 
+Production typography integration passed Samsung API 22 hardware validation. **Reading
+settings → Reading font** offers System Serif, System Sans, System Monospace,
+EB Garamond, Literata, Atkinson Hyperlegible Next and Bitter. Select a font and
+Apply; existing serif/sans preferences and all size, margin, spacing and theme
+defaults are preserved. Only the selected bundled family's four faces are loaded
+offline. Pagination/restoration wait for measured font readiness; a loading failure
+leaves the saved position untouched and offers recovery through Reading settings.
+See [Stage 2 evidence](tests/FONT-PROTOTYPE.md) and [typography notes](tests/READER-FONTS.md).
+
+Stage 3B adds **Follow Appearance** (default), Warm Paper, Soft Blue, Blue Night and
+Soft Dark reader-only palettes. Reading settings also includes **Continue reading
+on launch**, default ON. A fresh launcher task opens the remembered book using its
+existing saved text position; returning to a running task keeps the current screen.
+If a remembered book is missing or an automatic open fails/is interrupted before
+the first successful layout, the bookshelf remains available and repeated automatic
+attempts are suppressed until a book is opened successfully by hand. Turn the option
+OFF to start fresh tasks on the shelf. The latest build passed user-confirmed
+Samsung Galaxy Tab A / Android 5.1.1 hardware testing, including typography,
+pagination, reader palettes and Continue Reading on Launch. See
+[Reading Comfort testing](tests/READING-COMFORT.md).
+
 ## Designed and Tested Hardware
 
 BOOKWORM was specifically developed for the **Samsung Galaxy Tab A SM-T280**.

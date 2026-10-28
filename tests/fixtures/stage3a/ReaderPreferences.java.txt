@@ -1,0 +1,40 @@
+package com.bookworm.reader;
+import android.content.Context;
+import android.content.SharedPreferences;
+
+/** Reader typography is independent of Milestone 002's unchanged interface preferences. */
+public final class ReaderPreferences {
+    public boolean paged, serif;
+    public String fontId;
+    public boolean controlsOnOpen, showProgress;
+    public int size, margin, spacing;
+    public static ReaderPreferences load(Context context) {
+        SharedPreferences p = context.getSharedPreferences("reading", Context.MODE_PRIVATE);
+        ReaderPreferences r = new ReaderPreferences();
+        r.paged = p.getBoolean("paged", false); r.serif = p.getBoolean("serif", true);
+        r.fontId = ReaderFonts.selected(p.getString("font_id", null), r.serif);
+        r.controlsOnOpen = p.getBoolean("controls_on_open", false); r.showProgress = p.getBoolean("show_progress", true);
+        r.size = Math.max(14, Math.min(32, p.getInt("size", 20)));
+        r.margin = Math.max(8, Math.min(40, p.getInt("margin", 20)));
+        r.spacing = Math.max(12, Math.min(22, p.getInt("spacing", 16))); return r;
+    }
+    public boolean save(Context context) {
+        fontId = ReaderFonts.selected(fontId, serif);
+        if (ReaderFonts.SERIF.equals(fontId)) serif = true;
+        else if (ReaderFonts.SANS.equals(fontId)) serif = false;
+        return context.getSharedPreferences("reading", Context.MODE_PRIVATE).edit().putBoolean("paged", paged)
+                .putString("font_id", fontId)
+                .putBoolean("serif", serif).putInt("size", size).putInt("margin", margin).putInt("spacing", spacing)
+                .putBoolean("controls_on_open", controlsOnOpen).putBoolean("show_progress", showProgress).commit();
+    }
+    public String css(ThemeSettings theme) {
+        String font = ReaderFonts.selected(fontId, serif);
+        return ReaderFonts.css(font) + " html,body{margin:0!important;padding:0!important;background:" + ThemeSettings.hex(theme.background)
+                + "!important;color:" + ThemeSettings.hex(theme.text) + "!important;}"
+                + "body{font-family:" + ReaderFonts.family(font) + "!important;font-size:" + size + "px!important;line-height:" + spacing / 10.0 + "!important;}"
+                + "*{color:inherit!important;background:transparent!important;max-width:100%!important;word-wrap:break-word;}"
+                + "a{color:" + ThemeSettings.hex(theme.accent) + "!important;}"
+                + "#bw-content{box-sizing:border-box;padding:" + margin + "px;}img{max-width:100%!important;height:auto!important;max-height:80vh!important;}"
+                + "pre{white-space:pre-wrap!important;word-wrap:break-word;}table{table-layout:fixed;width:100%;}p,li{orphans:1;widows:1;}";
+    }
+}

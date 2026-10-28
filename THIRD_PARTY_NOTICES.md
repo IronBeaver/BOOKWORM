@@ -64,3 +64,27 @@ full upstream LICENSE and NOTICE are under LICENSES/. System fonts are reference
 not bundled. HTML named-entity mappings are generated standard character facts,
 with their JDK-table provenance retained; no JDK implementation is redistributed.
 See docs/LICENSING.md for the component audit and territorial book-rights review.
+
+## Bundled reader fonts — SIL Open Font License 1.1
+
+The following font software is redistributed unmodified under SIL OFL 1.1,
+separately from BOOKWORM's MIT application code. Complete original license notices:
+
+- **EB Garamond**: Copyright 2017 The EB Garamond Project Authors
+  (https://github.com/octaviopardo/EBGaramond12). The upstream notice also preserves
+  Copyright 2025 Deborah Khodanovich (RCS citation glyphs).
+  [Complete notice](app/src/main/assets/font-licenses/EBGaramond-OFL.txt).
+- **Literata**: Copyright 2017 The Literata Project Authors
+  (https://github.com/googlefonts/literata).
+  [Complete notice](app/src/main/assets/font-licenses/Literata-OFL.txt).
+- **Atkinson Hyperlegible Next**: Copyright 2020–2024 The Atkinson Hyperlegible Next
+  Project Authors (https://github.com/googlefonts/atkinson-hyperlegible-next).
+  [Complete notice](app/src/main/assets/font-licenses/AtkinsonHyperlegibleNext-OFL.txt).
+- **Bitter**: Copyright 2011 The Bitter Project Authors
+  (https://github.com/solmatas/BitterPro), Reserved Font Name **Bitter Pro**.
+  [Complete notice](app/src/main/assets/font-licenses/Bitter-OFL.txt).
+
+Exact file URLs, sizes and SHA-256 hashes are retained in the
+[approved manifest](tests/fixtures/font-prototype/assets/font-prototype/manifest.json).
+No runtime font service is used. The four notices are also accessible in Reading
+settings → Font licenses. System font choices redistribute no font files.

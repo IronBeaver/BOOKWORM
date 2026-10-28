@@ -1,0 +1,155 @@
+{
+  "purpose": "Debug-only Stage 2 compatibility prototype; approved Stage 1 bytes, no runtime downloads.",
+  "fonts": [
+    {
+      "family": "Atkinson Hyperlegible Next",
+      "face": "Regular",
+      "file": "AtkinsonHyperlegibleNext-Regular.ttf",
+      "bytes": 65068,
+      "sha256": "88ed5c31a71584c7772963b02d04bef1eb7e3d2e9c8b9cb204339b1f82cf432c",
+      "url": "https://raw.githubusercontent.com/googlefonts/atkinson-hyperlegible-next/7925f50f649b3813257faf2f4c0b381011f434f1/fonts/ttf/AtkinsonHyperlegibleNext-Regular.ttf"
+    },
+    {
+      "family": "Atkinson Hyperlegible Next",
+      "face": "Italic",
+      "file": "AtkinsonHyperlegibleNext-Italic.ttf",
+      "bytes": 69812,
+      "sha256": "b7f8f03ceb28ebadb2de2332b2e869a00e8dbfb5c8e00fdbb06385770c8227e7",
+      "url": "https://raw.githubusercontent.com/googlefonts/atkinson-hyperlegible-next/7925f50f649b3813257faf2f4c0b381011f434f1/fonts/ttf/AtkinsonHyperlegibleNext-Italic.ttf"
+    },
+    {
+      "family": "Atkinson Hyperlegible Next",
+      "face": "Bold",
+      "file": "AtkinsonHyperlegibleNext-Bold.ttf",
+      "bytes": 66792,
+      "sha256": "994414047df66bb4998d01c1cb1eeb4a2ddc4622d1aa56bbb8adbeca7645b041",
+      "url": "https://raw.githubusercontent.com/googlefonts/atkinson-hyperlegible-next/7925f50f649b3813257faf2f4c0b381011f434f1/fonts/ttf/AtkinsonHyperlegibleNext-Bold.ttf"
+    },
+    {
+      "family": "Atkinson Hyperlegible Next",
+      "face": "BoldItalic",
+      "file": "AtkinsonHyperlegibleNext-BoldItalic.ttf",
+      "bytes": 71456,
+      "sha256": "c2d3c596b54d1565ca20d383cdfb127b50b18b500b85a774fd07d4d976cd018b",
+      "url": "https://raw.githubusercontent.com/googlefonts/atkinson-hyperlegible-next/7925f50f649b3813257faf2f4c0b381011f434f1/fonts/ttf/AtkinsonHyperlegibleNext-BoldItalic.ttf"
+    },
+    {
+      "family": "Bitter",
+      "file": "Bitter-Regular.ttf",
+      "face": "Regular",
+      "bytes": 149332,
+      "sha256": "04b9e632f0791325153b80c882bdb6b1f099fdd5de99406e0485aa9a00e5674a",
+      "url": "https://fonts.gstatic.com/s/bitter/v42/raxhHiqOu8IVPmnRc6SY1KXhnF_Y8fbfCL8.ttf"
+    },
+    {
+      "family": "Bitter",
+      "file": "Bitter-Italic.ttf",
+      "face": "Italic",
+      "bytes": 148308,
+      "sha256": "53e9a4769672971e329e7bad7e4788b3447c8e524a1868a438733199fccf05c2",
+      "url": "https://fonts.gstatic.com/s/bitter/v42/raxjHiqOu8IVPmn7epZnDMyKBvHf5D6c4PzOWA.ttf"
+    },
+    {
+      "family": "Bitter",
+      "file": "Bitter-Bold.ttf",
+      "face": "Bold",
+      "bytes": 150600,
+      "sha256": "266d6ec27877c5c2b5840d1ab5edd0fc1eeb686c6d820b320e7b35e0f62b3e65",
+      "url": "https://fonts.gstatic.com/s/bitter/v42/raxhHiqOu8IVPmnRc6SY1KXhnF_Y8RHYCL8.ttf"
+    },
+    {
+      "family": "Bitter",
+      "file": "Bitter-BoldItalic.ttf",
+      "face": "BoldItalic",
+      "bytes": 149152,
+      "sha256": "bd194e1f87dd2978cd14eb4b34fa59e488c06d05933652d98fe44e05fe3a1e24",
+      "url": "https://fonts.gstatic.com/s/bitter/v42/raxjHiqOu8IVPmn7epZnDMyKBvHf5D6cB_vOWA.ttf"
+    },
+    {
+      "family": "EB Garamond",
+      "file": "EBGaramond-Regular.ttf",
+      "face": "Regular",
+      "bytes": 389868,
+      "sha256": "934aa932b4bc1a75d883f7c3d4d5bbc8278e5e7fcc96d5440bbffd61050cf958",
+      "url": "https://fonts.gstatic.com/s/ebgaramond/v33/SlGDmQSNjdsmc35JDF1K5E55YMjF_7DPuGi-6_RUAw.ttf"
+    },
+    {
+      "family": "EB Garamond",
+      "file": "EBGaramond-Italic.ttf",
+      "face": "Italic",
+      "bytes": 339240,
+      "sha256": "9d2ca86044b885d085059c7e3bed21d6e31456a81a47761e7ade8cd390ebe71d",
+      "url": "https://fonts.gstatic.com/s/ebgaramond/v33/SlGFmQSNjdsmc35JDF1K5GRwUjcdlttVFm-rI7e8QI96.ttf"
+    },
+    {
+      "family": "EB Garamond",
+      "file": "EBGaramond-Bold.ttf",
+      "face": "Bold",
+      "bytes": 392040,
+      "sha256": "40b4eb8a3c92f651728bc285ac3acacec1005ef5436cf33a337ab5ffe86daf29",
+      "url": "https://fonts.gstatic.com/s/ebgaramond/v33/SlGDmQSNjdsmc35JDF1K5E55YMjF_7DPuGi-DPNUAw.ttf"
+    },
+    {
+      "family": "EB Garamond",
+      "file": "EBGaramond-BoldItalic.ttf",
+      "face": "BoldItalic",
+      "bytes": 341916,
+      "sha256": "0091630894dabe073cfaecc65c10425d9e74dbf242943ea11f1c3cb533695dff",
+      "url": "https://fonts.gstatic.com/s/ebgaramond/v33/SlGFmQSNjdsmc35JDF1K5GRwUjcdlttVFm-rI7dbR496.ttf"
+    },
+    {
+      "family": "Literata",
+      "file": "Literata-Regular.ttf",
+      "face": "Regular",
+      "bytes": 170668,
+      "sha256": "1d6eafdc620333fcc3d573c115fc62ea78d0965d1f72a8f549fc9660fef556b3",
+      "url": "https://fonts.gstatic.com/s/literata/v40/or3PQ6P12-iJxAIgLa78DkrbXsDgk0oVDaDPYLanFLHpPf2TbBG_F_Y.ttf"
+    },
+    {
+      "family": "Literata",
+      "file": "Literata-Italic.ttf",
+      "face": "Italic",
+      "bytes": 166072,
+      "sha256": "bad55524c5f792c2796e2e62f2edd100506cd108b2456c34dea7afa4f297ab88",
+      "url": "https://fonts.gstatic.com/s/literata/v40/or3NQ6P12-iJxAIgLYT1PLs1Zd0nfUwAbeGVKoRYzNiCp1OUedn8_7XWSQ.ttf"
+    },
+    {
+      "family": "Literata",
+      "file": "Literata-Bold.ttf",
+      "face": "Bold",
+      "bytes": 173948,
+      "sha256": "752bd45b08e48848cd2bd30c969f1ad52742c6a519665cedabf3cf29164823ac",
+      "url": "https://fonts.gstatic.com/s/literata/v40/or3PQ6P12-iJxAIgLa78DkrbXsDgk0oVDaDPYLanFLHpPf2TbPa4F_Y.ttf"
+    },
+    {
+      "family": "Literata",
+      "file": "Literata-BoldItalic.ttf",
+      "face": "BoldItalic",
+      "bytes": 169356,
+      "sha256": "72233aa2728bbb5937781bf69b0afeaa1e8d38d73ae0a10080cbc921675f7551",
+      "url": "https://fonts.gstatic.com/s/literata/v40/or3NQ6P12-iJxAIgLYT1PLs1Zd0nfUwAbeGVKoRYzNiCp1OUedn8GLLWSQ.ttf"
+    }
+  ],
+  "licenses": [
+    {
+      "family": "EB Garamond",
+      "file": "EBGaramond-OFL.txt",
+      "url": "https://raw.githubusercontent.com/octaviopardo/EBGaramond12/106a4a6d377987459ae5e68673a4570f13b957fb/OFL.txt"
+    },
+    {
+      "family": "Literata",
+      "file": "Literata-OFL.txt",
+      "url": "https://raw.githubusercontent.com/googlefonts/literata/0c2761b727a1b3a7cffd313c37f0f5163dfc7a63/OFL.txt"
+    },
+    {
+      "family": "Atkinson Hyperlegible Next",
+      "file": "AtkinsonHyperlegibleNext-OFL.txt",
+      "url": "https://raw.githubusercontent.com/googlefonts/atkinson-hyperlegible-next/7925f50f649b3813257faf2f4c0b381011f434f1/OFL.txt"
+    },
+    {
+      "family": "Bitter",
+      "file": "Bitter-OFL.txt",
+      "url": "https://raw.githubusercontent.com/solmatas/BitterPro/3238d7ae2cb0b564b81225d68b3c893a40b1d3ce/OFL.txt"
+    }
+  ]
+}
