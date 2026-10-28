@@ -70,7 +70,18 @@ public final class MainActivity extends ThemedActivity {
         FrameLayout frame = new FrameLayout(this);
         list = new ListView(this); list.setDivider(null); list.setCacheColorHint(appearance.background); list.setItemsCanFocus(true);
         adapter = new BookshelfAdapter(this, this::openBook, this::bookOptions, this::selectBook);
-        list.addOnLayoutChangeListener((v,l,t,r,b,ol,ot,or,ob) -> adapter.width(r-l-list.getPaddingLeft()-list.getPaddingRight()));
+        final ListView shelf = list;
+        final BookshelfAdapter shelfAdapter = adapter;
+        Runnable updateShelfWidth = () -> {
+            if (list != shelf || adapter != shelfAdapter || isFinishing() || isDestroyed()) return;
+            int usableWidth = shelf.getWidth() - shelf.getPaddingLeft() - shelf.getPaddingRight();
+            if (usableWidth > 0) shelfAdapter.width(usableWidth);
+        };
+        list.addOnLayoutChangeListener((v,l,t,r,b,ol,ot,or,ob) -> {
+            // Coalesce width updates and notify the adapter outside the active layout pass.
+            shelf.removeCallbacks(updateShelfWidth);
+            shelf.post(updateShelfWidth);
+        });
         list.setAdapter(adapter); adapter.submit(books, sort);
         empty = text("Preparing your library…", false); empty.setGravity(android.view.Gravity.CENTER);
         frame.addView(list, new FrameLayout.LayoutParams(-1, -1)); frame.addView(empty, new FrameLayout.LayoutParams(-1, -1)); list.setEmptyView(empty);

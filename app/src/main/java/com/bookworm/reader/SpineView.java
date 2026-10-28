@@ -2,7 +2,6 @@ package com.bookworm.reader;
 
 import android.graphics.*;
 import android.text.TextPaint;
-import android.text.TextUtils;
 import android.util.LruCache;
 import android.view.View;
 
@@ -52,18 +51,14 @@ public final class SpineView extends View {
             public float lineHeight(float size) { text.setTextSize(size); return text.getFontSpacing(); }
         });
         text.setTextSize(layout.size);
-        c.save(); c.clipRect(-available/2,-25*u,available/2,12*u);
-        float baseline=-22*u-text.ascent();
+        c.save(); c.clipRect(-available/2,-25*u,available/2,25*u);
+        Paint.FontMetrics metrics=text.getFontMetrics();
+        // Rotated text height runs across the spine; centre the entire title block.
+        float baseline=-(metrics.ascent+metrics.descent+(layout.lines.size()-1)*layout.lineHeight)/2f;
         for(String line:layout.lines) { c.drawText(line,-available/2,baseline,text); baseline+=layout.lineHeight; }
         c.restore();
-        if(author!=null && !author.trim().isEmpty()) {
-            text.setTypeface(Typeface.create("serif",Typeface.NORMAL)); text.setTextSize(8*u);
-            String by=TextUtils.ellipsize(clean(author),text,available,TextUtils.TruncateAt.END).toString();
-            c.drawText(by,-available/2,24*u,text);
-        }
         c.restore(); return result;
     }
-    private static String clean(String s) { return s==null || s.trim().isEmpty() ? "Untitled" : s.replaceAll("\\s+"," ").trim(); }
     @Override protected void onDraw(Canvas canvas) {
         super.onDraw(canvas); if(bitmap==null) return;
         target.set(0,0,getWidth(),getHeight()); canvas.drawBitmap(bitmap,null,target,paint);
