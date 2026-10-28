@@ -12,7 +12,6 @@ public final class SettingsActivity extends ThemedActivity {
         super.onResume(); loadAppearance();
         LinearLayout root = column(); root.setPadding(dp(12), 0, dp(12), dp(12)); root.addView(ShelfUi.toolbar(this, "Settings", true));
         ScrollView scroll = new ScrollView(this); LinearLayout groups = new LinearLayout(this); groups.setOrientation(LinearLayout.VERTICAL);
-        section(groups, "Discover", "Browse Books", "Search the independent Gutendex catalog for Project Gutenberg EPUBs", () -> startActivity(new Intent(this, BrowseActivity.class)));
         section(groups, "Appearance", "Theme & Bindery", "Colours, interface type and global cover policy", () -> startActivity(new Intent(this, AppearanceActivity.class)));
         section(groups, "Bookshelf", "Shelf presentation & depth", "Grid, classic covers or experimental spines; dimensional cover effects", () -> startActivity(new Intent(this, AppearanceActivity.class).putExtra("focus_bookshelf", true)));
         section(groups, "Reading", "Reading appearance", "Mode, font, size, margins and line spacing", () -> startActivity(new Intent(this, ReadingSettingsActivity.class)));
