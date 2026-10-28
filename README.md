@@ -38,6 +38,12 @@ Samsung Galaxy Tab A / Android 5.1.1 hardware testing, including typography,
 pagination, reader palettes and Continue Reading on Launch. See
 [Reading Comfort testing](tests/READING-COMFORT.md).
 
+## How BOOKWORM was created
+
+BOOKWORM was developed through a human-directed collaboration involving its project creator, ChatGPT, and Codex. The creator defined the objectives, tested the software on physical hardware, and retained control over design and release decisions.
+
+Read the [BOOKWORM development case study](docs/BOOKWORM-CASE-STUDY.md) for an evidence-based examination of the process, including successes, failures, and lessons learned. A separate [evidence and provenance index](docs/CASE-STUDY-EVIDENCE.md) identifies supporting records and explains their limitations.
+
 ## Designed and Tested Hardware
 
 BOOKWORM was specifically developed for the **Samsung Galaxy Tab A SM-T280**.
@@ -92,7 +98,7 @@ intermediate historical commits or v1.1 tag have been invented.
 
 ## Installation and updates
 
-No public APK download is published yet. Obtain a reviewed APK from the project
+The public v2.0.0 APK is available from the [GitHub release page](https://github.com/IronBeaver/BOOKWORM/releases/tag/v2.0.0). Obtain a reviewed APK from the project
 owner or build one locally; do not download random repackaged copies.
 
 1. Check Android/API requirements and retain your original EPUB files safely.
