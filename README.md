@@ -7,10 +7,15 @@ personally modifiable.
 > Anything that might encourage someone to read a single word more should be
 > freely available and personally modifiable.
 
-**This branch: develop — v1.2, versionCode 10.** Stable v1.0 is on `main` and
-annotated tag `v1.0.0`. The physical bookshelf has been hardware-tested; catalog
-networking is experimental and currently times out on the reference tablet.
-Nothing has been published to GitHub yet.
+**Stable release: BOOKWORM v2.0.0, versionCode 11**, on `main` and annotated tag
+`v2.0.0`. The approved functional source is
+`b74086a1000e0de5a1e111ce7ef2cbfd11a2c3ce`; release preparation changes only
+version/signing configuration and documentation. Stable v1.0 remains preserved at
+`v1.0.0` and in its existing local archive. Gutenberg discovery is deferred and
+not exposed in the v2 user interface.
+
+[Download BOOKWORM v2.0.0](https://github.com/IronBeaver/BOOKWORM/releases/tag/v2.0.0)
+and see the [release notes](docs/releases/BOOKWORM-v2.0.0.md).
 
 Production typography integration passed Samsung API 22 hardware validation. **Reading
 settings → Reading font** offers System Serif, System Sans, System Monospace,

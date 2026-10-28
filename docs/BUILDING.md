@@ -29,6 +29,24 @@ but the provided host validation scripts use PowerShell and Windows JDK executab
 Debug APK: `app/build/outputs/apk/debug/app-debug.apk`.
 Lint report: `app/build/reports/lint-results-debug.html`.
 
+## Owner's v2.0.0 release build
+
+The release variant uses the same existing workspace signing configuration and
+certificate as the previously distributed BOOKWORM APKs, with debuggable disabled.
+The historical certificate is named Android Debug; no replacement key is created.
+Using a different key prevents an in-place upgrade of the installed app.
+
+With the established private keystore already present, run:
+
+    .\gradlew.bat --no-daemon --console=plain --offline :app:assembleRelease :app:lintRelease
+
+Output: `app/build/outputs/apk/release/app-release.apk`. Verify with apksigner and
+`--min-sdk-version 22`; compare the certificate to the original distributed APK.
+VersionName is 2.0.0 and versionCode is 11, above stable v1.0's code 8 and the
+validated development build's code 10. Never commit keystores, local.properties,
+credentials or generated APKs. Contributors' own debug keys are for separate test
+installs and cannot replace the owner's installed app.
+
 ## Your own debug signing key
 
 The unchanged build configuration uses

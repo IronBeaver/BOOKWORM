@@ -11,8 +11,8 @@ android {
         applicationId 'com.bookworm.reader'
         minSdk 22
         targetSdk 35
-        versionCode 10
-        versionName '1.2'
+        versionCode 11
+        versionName '2.0.0'
     }
 
     compileOptions {
@@ -24,6 +24,11 @@ android {
         debug {
             // Keep the generated debug key inside the workspace.
             signingConfig signingConfigs.debug
+        }
+        release {
+            // Preserve the established installed-user certificate; never replace the key.
+            signingConfig signingConfigs.debug
+            debuggable false
         }
     }
     signingConfigs {
