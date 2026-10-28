@@ -66,7 +66,19 @@
                 pages = Math.max(1, Math.ceil((main.scrollWidth + 2 * margin) / width));
             }
             index();
-            document.addEventListener('touchmove', function (event) { if (paged) event.preventDefault(); }, false);
+            var touchOptions = false;
+            try {
+                var probe = Object.defineProperty({}, 'passive', { get: function () { touchOptions = {passive: false}; return false; } });
+                var noop = function () {};
+                window.addEventListener('bw-passive-probe', noop, probe);
+                window.removeEventListener('bw-passive-probe', noop, probe);
+            } catch (unsupported) { /* Older WebViews use the boolean capture argument. */ }
+            document.addEventListener('touchmove', function (event) {
+                if (!paged || !event.cancelable) return;
+                var selected = window.getSelection ? window.getSelection() : null;
+                if (selected && selected.rangeCount && !selected.isCollapsed) return;
+                event.preventDefault();
+            }, touchOptions);
             return go(offset, fragment);
         },
         position: position,
